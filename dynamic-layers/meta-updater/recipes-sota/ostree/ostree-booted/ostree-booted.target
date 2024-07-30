@@ -1,0 +1,5 @@
+[Unit]
+Description=Indicate an OSTree boot
+Requires=multi-user.target
+After=multi-user.target
+AllowIsolate=yes

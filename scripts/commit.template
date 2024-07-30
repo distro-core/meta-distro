@@ -1,0 +1,20 @@
+# Install the template by copying it to your local drive, per repository
+# using the command "git config --local commit.template <template_path>"
+# use "git commit --gpg-sign --signoff --edit" to invoke template
+#
+# PREFIX issue format is meta-distro/issue#issue_number
+#
+# |<----  Using a Maximum Of 50 Characters  ---->|
+meta-distro/issue#n Commit Description/Title of One Line
+
+# Explain why this change is being made. Be descriptive.
+# |<----   Try To Limit Each Line to a Maximum Of 72 Characters   ---->|
+Description of the commit and what it accomplishes. The description
+should be a couple of sentences. Multiple paragraphs can be used when
+necessary and are seperated by single blank lines.
+
+# The last line of the commit must look like this:
+# Signed-off-by: Firstname Lastname <username@users.noreply.github.com>
+#
+# The information that follows is a listing supplied by git of the files
+# that are associated with the commit.

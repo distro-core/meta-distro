@@ -1,0 +1,62 @@
+# conf/templates/distro-core/bblayers.conf.sample
+
+POKY_BBLAYERS_CONF_VERSION = "2"
+
+BBPATH = "${TOPDIR}"
+BBFILES = ""
+
+# Pathing order is important here; the optional layers are pathed as expected in relation
+# to the other required layers. The operator used in the context of BBLAYERS is expected
+# to be "+=" to have a deterministic search order in the pathing established by bitbake.
+
+BBLAYERS  = "${TOPDIR}/../../layers/meta-distro"
+BBLAYERS += "${TOPDIR}/../../layers/poky/meta"
+BBLAYERS += "${TOPDIR}/../../layers/poky/meta-poky"
+
+# required sdk
+# BBLAYERS += "${TOPDIR}/../../layers/meta-clang"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-mingw"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-rust"
+
+# required meta-openembedded
+BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-oe"
+BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-filesystems"
+BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-networking"
+BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-perl"
+BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-python"
+
+# required
+BBLAYERS += "${TOPDIR}/../../layers/meta-security"
+BBLAYERS += "${TOPDIR}/../../layers/meta-security/meta-integrity"
+BBLAYERS += "${TOPDIR}/../../layers/meta-security/meta-tpm"
+BBLAYERS += "${TOPDIR}/../../layers/meta-selinux"
+BBLAYERS += "${TOPDIR}/../../layers/meta-updater"
+BBLAYERS += "${TOPDIR}/../../layers/meta-virtualization"
+
+# optional meta-openembedded
+# BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-gnome"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-multimedia"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-webserver"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-openembedded/meta-xfce"
+
+# required bsp
+BBLAYERS += "${TOPDIR}/../../layers/meta-intel"
+
+# optional bsp
+# BBLAYERS += "${TOPDIR}/../../layers/meta-arm"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-freescale"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-freescale-3rdparty"
+BBLAYERS += "${TOPDIR}/../../layers/meta-raspberrypi"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-st-stm32mp"
+BBLAYERS += "${TOPDIR}/../../layers/meta-tegra"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-ti"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-xilinx"
+# BBLAYERS += "${TOPDIR}/../../layers/meta-xilinx-tools"
+
+# masked recipes (remove greedy match with paths)
+BBMASK += "packagegroup-distro[^/]*\.bbappend$"
+BBMASK += "distro[^/]*\.bbappend$"
+# dependency on meta-clang/selinux
+BBMASK += "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'uutils-coreutils', '', d)}"
+
+# ---

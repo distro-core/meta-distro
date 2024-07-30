@@ -1,0 +1,219 @@
+#!/bin/bash
+
+set -o errexit
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_NAME=$(basename $0)
+
+VALID_ARGS=$(getopt -o hbc:dsD:M:Tt::p:S --long help,no-clean-build,clean-targets:,clean-download,clean-sstate,distro:,machine:,target:,target-flags:,proxy:,save-artifacts -- "$@")
+if [[ $? -ne 0 ]]; then
+    exit 1
+fi
+
+eval set -- "$VALID_ARGS"
+while [ : ]; do
+    case "$1" in
+        -h | --help)
+            echo "Usage: $SCRIPT_NAME [--proxy='proxy'] [--machine='<machine_list>'] [--target='<target_list>']"
+            echo "--distro='distro'                set distro"
+            echo "--machine='<machine_list>'       set machine_list"
+            echo "--target='<target_list>'         set target_list"
+            echo "--no-clean-build                 do not clean build artifacts"
+            echo "--clean-download                 clean shared downloads"
+            echo "--clean-sstate                   clean shared sstate-cache"
+            echo "--clean-targets='<target_list>'  clean target_list"
+            echo "--proxy='proxy'                  set proxy url"
+            exit 0
+            ;;
+        -b | --no-clean-build)
+            no_clean_build=1
+            shift
+            ;;
+        -c | --clean-target)
+            clean_targets=( $2 )
+            shift 2
+            ;;
+        -d | --clean-download)
+            clean_downloads=1
+            shift
+            ;;
+        -s | --clean-sstate)
+            clean_sstate=1
+            shift
+            ;;
+        -D | --distro)
+            distro=$2
+            shift 2
+            ;;
+        -M | --machine)
+            machines=( $2 )
+            shift 2
+            ;;
+        -T | --target)
+            targets=( $2 )
+            shift 2
+            ;;
+        -t | --target-flags)
+            targets_flags=( $2 )
+            shift 2
+            ;;
+        -p | --proxy)
+            proxy=$2
+            shift 2
+            ;;
+        -S | --save-artifacts)
+            save_artifacts=1
+            shift
+            ;;
+        -H | --hashserv)
+            hashserv=$2
+            shift 2
+            ;;
+        -P | --prserv)
+            prserv=$2
+            shift 2
+            ;;
+        --) shift
+            break
+            ;;
+    esac
+done
+
+# if [ -n "${clean_sstate}" -a -n "${no_clean_build}" ]; then
+#     echo "ERROR: mutually exclusive options --clean-sstate --no-clean-build"
+#     exit 1
+# fi
+
+if [ -z "${distro}" ]; then
+    distro=distro-core
+    echo "INFO: set default distro to ${distro}"
+fi
+
+if [ ${#machines[*]} -eq 0 ]; then
+    machines=( sbc-gene-bt05 )
+    echo "INFO: set default machines to ${machines[*]}"
+fi
+
+if [ ${#targets[*]} -eq 0 ]; then
+    targets=( distro-image distro-sdk-image )
+    echo "INFO: set default targets to ${targets[*]}"
+fi
+
+if [ -n "${proxy}" ]; then
+    proto="$(echo ${proxy} | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+    url="$(echo ${proxy/$proto/})"
+    user="$(echo $url | grep @ | cut -d@ -f1)"
+    hostport="$(echo ${url/$user@/} | cut -d/ -f1)"
+    host="$(echo $hostport | sed -e 's,:.*,,g')"
+    port="$(echo $hostport | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
+    path="$(echo $url | grep / | cut -d/ -f2-)"
+    if socat /dev/null TCP:$host:$port >/dev/null; then
+        echo "INFO: set proxy to ${proxy}"
+        export http_proxy=${proxy}
+        export https_proxy=${proxy}
+        export no_proxy="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.0.0.0/8"
+    fi
+fi
+
+clean_dir() {
+    echo "INFO: clean $1"
+    if [ -d $1 ]; then
+        rm -fr $1/
+    fi
+}
+
+if [ -n "${clean_downloads}" ]; then
+    clean_dir build/downloads
+else
+    echo "INFO: retain build/downloads"
+fi
+
+if [ -n "${clean_sstate}" ]; then
+    clean_dir build/sstate-cache
+else
+    echo "INFO: retain build/sstate-cache"
+fi
+
+for machine in ${machines[*]}; do
+
+    deploy_dir=artifacts/${machine} # aka DEPLOY_DIR
+    build_dir=build/${machine}      # aka TOPDIR
+
+    if [ -n "${no_clean_build}" ]; then
+        echo "INFO: retain ${build_dir}"
+        echo "INFO: retain ${deploy_dir}"
+        clean_dir ${build_dir}/conf
+    else
+        clean_dir ${build_dir}
+        clean_dir ${deploy_dir}
+    fi
+
+    mkdir -p ${deploy_dir} ${build_dir}
+
+done
+
+# repo sync
+repo forall -c "git config --local url."https://".insteadOf git://" || true
+# repo forall -c "git ls-remote \$REPO_REMOTE || true"
+# repo forall -c "printf '\n----\n%s: git checkout %s/%s\n' \$REPO_PROJECT \$REPO_REMOTE \$REPO_RREV; git checkout --track \$REPO_REMOTE/\$REPO_RREV || true"
+# repo forall -c "printf '\n----\n%s: git remote remove src_uri\n' \$REPO_PROJECT; git remote remove src_uri || true"
+# repo forall -g mirror -v -c "printf '\n----\n%s: git remote add src_uri %s\n' \$REPO_PROJECT \$REPO__src_uri; echo git remote add src_uri \$REPO__src_uri || true"
+# repo forall -g mirror -v -c "printf '\n----\n%s: git fetch --all\n' \$REPO_PROJECT; echo git fetch --all || true"
+
+# Available to CI/CD for modification
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} DISTRO MACHINE DEPLOY_DIR"
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} BB_GENERATE_MIRROR_TARBALLS BB_GENERATE_SHALLOW_TARBALLS"
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} BB_NO_NETWORK BB_NICE_LEVEL BB_TASK_NICE_LEVEL  BB_NUMBER_THREADS PARALLEL_MAKE"
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} MASTER_KEYS_DIR"
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} OSTREE_BRANCHNAME OSTREE_REPO"
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} REPO_MANIFEST_NAME REPO_MANIFEST_BRANCH REPO_MANIFEST_COMMITID"
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} VENDOR_UUID"
+export BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS} SOURCE_MIRROR_URL BB_HASHSERVE SSTATE_MIRRORS PRSERV_HOST"
+
+for machine in ${machines[*]}; do
+
+    deploy_dir=artifacts/${machine}
+    build_dir=build/${machine}
+
+    export MACHINE=${machine}
+    export DISTRO=${distro}
+    export DEPLOY_DIR=$(pwd)/${deploy_dir}
+    # export MASTER_KEYS_DIR=$(pwd)/layers/meta-distro/files/user-keys
+    # export BB_NUMBER_THREADS="${BB_NUMBER_THREADS:-$(( $(nproc) * 3 / 4 ))}"
+    # export PARALLEL_MAKE="${PARALLEL_MAKE:--j$(( BB_NUMBER_THREADS + 0 ))}"
+    export REPO_MANIFEST_NAME=$(xmllint --xpath "/manifest/include/@name" .repo/manifest.xml | grep -Po 'name="\K[^"]*')
+
+    orig_cwd=$(pwd)
+
+    {
+    TEMPLATECONF=$(pwd)/layers/meta-distro/conf/templates/${distro} \
+        source layers/poky/oe-init-build-env $(pwd)/${build_dir}
+    } >/dev/null
+
+    rm -f *.log *.lock *.sock ${build_dir}/*.log
+
+    echo "INFO: BEGIN ${REPO_MANIFEST_NAME} ${targets[*]}"
+
+    if [ ${#clean_targets[*]} -ne 0 ]; then
+        bitbake -c cleansstate ${clean_targets[*]}
+    fi
+
+    bitbake ${targets_flags[*]} ${targets[*]}
+
+    echo "INFO: END ${REPO_MANIFEST_NAME} ${targets[*]}"
+
+    rm -f bitbake-cookerdaemon.log
+    cp -f bitbake*.log ${DEPLOY_DIR}
+
+    cd ${orig_cwd}
+
+done
+
+if [ -n "${save_artifacts}" ]; then
+    echo "INFO: sync artifacts"
+fi
+
+# DAYS=14
+# find build/sstate-cache -type f -mtime +${DAYS} -delete
+
+exit 0

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Do not apply this script to an existing WSL instance without evaluating
+# the changes it will make. It will also be necessary to edit the GPG-KEY-ID
+# inserted to match the key used for repository signing.
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_NAME=$(basename $0)
+
+git_config=~/.config/git/config
+
+mkdir -p ~/.config/git
+touch ${git_config}
+
+cp ${SCRIPT_DIR}/commit.template ~/.config/git/commit.template
+
+[[ $(git config --get user.name) ]] || git config --file ${git_config} user.name "Firstname Surname"
+[[ $(git config --get user.email) ]] || git config --file ${git_config} user.email "username@users.noreply.github.com"
+[[ $(git config --get user.signingkey) ]] || git config --file ${git_config} user.signingkey "GPG-KEY-ID"
+
+echo "Edit ${git_config} and set appropriate values for the user, aka GPG-KEY-ID"
+
+git config --file ${git_config} commit.gpgsign "true"
+git config --file ${git_config} commit.template "~/.config/git/commit.template"
+
+git config --file ${git_config} core.editor "code"
+git config --file ${git_config} trailer.sign.key "Signed-off-by"
+
+touch ~/.config/git/credentials
+chmod 600 ~/.config/git/credentials
+
+git config --file ${git_config} credential.helper "store --file=~/.config/git/credentials"
+
+echo "Edit ~/.config/git/credentials to contain credentials as a URL"
+
+git config --file ${git_config} url."https://".insteadOf git://
+
+git config --file ${git_config} core.autocrlf "false"
+git config --file ${git_config} init.defaultBranch "main"
+
+git config --file ${git_config} difftool.vscode.cmd 'code --wait --diff $LOCAL $REMOTE'
+git config --file ${git_config} diff.tool vscode
+
+git config --file ${git_config} merge.tool vscode
+git config --file ${git_config} mergetool.vscode.cmd 'code --wait $MERGED'
+
+git config --file ${git_config} http.lowSpeedLimit 1000
+git config --file ${git_config} http.lowSpeedTime 600
+
+exit 0

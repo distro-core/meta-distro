@@ -1,0 +1,93 @@
+root:x:0:0:root:/root:/bin/sh
+daemon:x:1:1:daemon:/usr/sbin:/sbin/nologin
+bin:x:2:2:bin:/bin:/sbin/nologin
+sys:x:3:3:sys:/dev:/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/sbin/nologin
+man:x:6:12:man:/var/cache/man:/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/sbin/nologin
+mail:x:8:8:mail:/var/mail:/sbin/nologin
+news:x:9:9:news:/var/spool/news:/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/sbin/nologin
+proxy:x:13:13:proxy:/bin:/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/sbin/nologin
+backup:x:34:34:backup:/var/backups:/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/sbin/nologin
+weston:x:63:63:weston:/home/weston:/sbin/nologin
+pulse:x:171:171:pulse:/var/run/pulse:/sbin/nologin
+_apt:x:500:500:_apt:/nonexistent:/sbin/nologin
+arpwatch:x:501:501:arpwatch:/nonexistent:/sbin/nologin
+builder:x:502:502:builder:/nonexistent:/sbin/nologin
+clamav:x:503:503:clamav:/nonexistent:/sbin/nologin
+colord:x:504:504:colord:/nonexistent:/sbin/nologin
+cyrus:x:505:505:cyrus:/nonexistent:/sbin/nologin
+distcc:x:507:65534:distcc:/nonexistent:/sbin/nologin
+dovecot:x:508:508:dovecot:/nonexistent:/sbin/nologin
+dovenull:x:509:509:dovenull:/nonexistent:/sbin/nologin
+frr:x:510:510:frr:/nonexistent:/sbin/nologin
+ftp:x:512:512:ftp:/nonexistent:/sbin/nologin
+influxdb:x:513:513:influxdb:/nonexistent:/sbin/nologin
+jhi:x:514:514:jhi:/nonexistent:/sbin/nologin
+krill:x:515:515:krill:/nonexistent:/sbin/nologin
+lldpd:x:516:516:lldpd:/nonexistent:/sbin/nologin
+logcheck:x:517:517:logcheck:/nonexistent:/sbin/nologin
+media:x:518:65534:media:/nonexistent:/sbin/nologin
+postgres:x:28:28:postgres:/nonexistent:/sbin/nologin
+mongodb:x:520:520:mongodb:/nonexistent:/sbin/nologin
+mysql:x:521:521:mysql:/nonexistent:/sbin/nologin
+opensaf:x:523:523:opensaf:/nonexistent:/sbin/nologin
+ossec:x:524:524:ossec:/nonexistent:/sbin/nologin
+pcpqa:x:525:525:pcpqa:/nonexistent:/sbin/nologin
+postfix:x:527:527:postfix:/nonexistent:/sbin/nologin
+mei:x:528:880:mei:/nonexistent:/sbin/nologin
+ppp:x:529:65534:ppp:/nonexistent:/sbin/nologin
+qemu:x:530:530:qemu:/nonexistent:/sbin/nologin
+quagga:x:531:531:quagga:/nonexistent:/sbin/nologin
+radiusd:x:533:533:radiusd:/nonexistent:/sbin/nologin
+radvd:x:534:534:radvd:/nonexistent:/sbin/nologin
+redis:x:535:535:redis:/nonexistent:/sbin/nologin
+rwhod:x:536:536:rwhod:/nonexistent:/sbin/nologin
+sanlock:x:537:537:sanlock:/nonexistent:/sbin/nologin
+squid:x:538:538:squid:/nonexistent:/sbin/nologin
+test:x:539:539:test:/nonexistent:/sbin/nologin
+tinyproxy:x:540:65534:tinyproxy:/nonexistent:/sbin/nologin
+vmail:x:542:542:vmail:/nonexistent:/sbin/nologin
+xrdp:x:543:543:xrdp:/nonexistent:/sbin/nologin
+xuser:x:544:544:xuser:/nonexistent:/sbin/nologin
+zabbix:x:545:545:zabbix:/nonexistent:/sbin/nologin
+pipewire:x:546:546:zabbix:/nonexistent:/sbin/nologin
+mpd:x:547:547:mpd:/nonexistent:/sbin/nologin
+gdm:x:548:548:gdm:/nonexistent:/sbin/nologin
+privacyidea:x:549:549:privacyidea:/nonexistent:/sbin/nologin
+ptest:x:550:550:ptest:/:/bin/nologin
+ntp:x:551:551:ntp:/var/lib/ntp:/sbin/nologin
+parsec:x:552:552:parsec:/var/lib/parsec:/sbin/nologin
+nm-openvpn:x:553:553:nm-openvpn:/home/nm-openvpn:/sbin/nologin
+mosquitto:x:554:554:mosquitto:/home/mosquitto:/sbin/nologin
+dhcpcd:x:555:555:dhcpd:/var/lib/dhcpcd:/sbin/nologin
+tss:x:556:556:tss:/var/lib/tpm:/sbin/nologin
+avahi:x:557:557:avahi:/run/avahi-daemon:/sbin/nologin
+avahi-autoipd:x:558:558:Avahi autoip daemon:/run/avahi-autoipd:/sbin/nologin
+sshd:x:559:559:sshd:/var/run/sshd:/sbin/nologin
+messagebus:x:560:560:System Message Bus:/var/lib/dbus:/sbin/nologin
+rpcuser:x:561:561:rpcuser:/var/lib/nfs:/sbin/nologin
+bind:x:562:562:bind:/var/cache/bind:/sbin/nologin
+dhcp:x:563:563:dhcp:/var/run/dhcp:/sbin/nologin
+rpc:x:564:564:rpc:/:/sbin/nologin
+polkitd:x:565:565:polkitd:/etc/polkit-1:/sbin/nologin
+systemd-journal-upload:x:580:580:systemd-journal-upload:/:/sbin/nologin
+systemd-bus-proxy:x:581:581:systemd-bus-proxy:/:/sbin/nologin
+systemd-timesync:x:582:582:systemd Time Synchronization:/:/sbin/nologin
+systemd-resolve:x:583:583:systemd Resolver:/:/sbin/nologin
+systemd-network:x:584:584:systemd Network Management:/:/sbin/nologin
+systemd-journal:x:585:585:systemd-journal:/:/sbin/nologin
+systemd-journal-gateway:x:586:586:systemd-journal-gateway:/:/sbin/nologin
+systemd-journal-remote:x:587:587:systemd-journal-remote:/:/sbin/nologin
+systemd-coredump:x:588:588:systemd-coredump:/:/sbin/nologin
+fwupd-refresh:x:599:599:Firmware update daemon:/var/lib/fwupd:/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/sbin/nologin
+docker:x:1000:1000:docker:/nonexistent:/sbin/nologin
+admin:x:1001:1001:admin:/home/admin:/bin/sh
+user:x:1002:1002:user:/home/user:/bin/sh

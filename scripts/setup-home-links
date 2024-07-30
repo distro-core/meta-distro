@@ -1,0 +1,151 @@
+#!/bin/bash
+
+# Setup for a new wsl2 instance
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_NAME=$(basename $0)
+
+source /etc/os-release
+
+if [ -n "$(command -v setx.exe)" ]; then
+    if [ -z "USERPROFILE" ]; then
+        setx.exe GNUPGHOME '%USERPROFILE%\.gnupg'
+        setx.exe WSLENV 'USERNAME:USERPROFILE/p'
+        echo "Terminate the wsl2 instance and restart. Run $SCRIPT_NAME again to finalize."
+        exit 0
+    fi
+fi
+
+# if [ -n "$(command -v winget.exe)" ]; then
+#     # installation of virtualbox
+#     winget.exe install Oracle.VirtualBox --accept-package-agreements
+#     # installation of gnupg for windows
+#     winget.exe install GnuPG.GnuPG GnuPG.Gpg4win --accept-package-agreements
+# fi
+
+# existing metadata could reflect uid/gid from a different instance; if necessary, copy files to FAT device
+# remove original, then restore from FAT device
+
+if [ -d "$USERPROFILE" ]; then
+
+    sudo bash -c "
+cat >/etc/sudoers.d/localhost <<EOF
+# allow all commands with no-password
+$(id -un) ALL=(ALL:ALL) NOPASSWD: ALL
+EOF
+"
+
+    sudo bash -c "
+cat >/etc/wsl.conf <<EOF
+[boot]
+systemd=true
+[user]
+default=$(id -un)
+[automount]
+uid=$(id -u)
+gid=$(id -g)
+metadata=disabled
+options=uid=$(id -u),gid=$(id -g),case=dir,umask=077,fmask=077,dmask=077
+[network]
+hostname=wsl2
+[interop]
+EOF
+"
+
+    if [ ! -e "$USERPROFILE/.wslconfig" ]; then
+        sudo bash -c "
+cat >$USERPROFILE/.wslconfig <<EOF
+[wsl2]
+# swap=0
+# memory=32G
+# processors=16
+defaultVhdSize=256G
+[experimental]
+sparseVhd=true
+autoMemoryReclaim=dropcache
+EOF
+"
+    fi
+
+    # working folder per doc
+    sudo mkdir -p /srv/build
+    sudo chmod 1777 /srv/build
+
+    # install this script in instance
+    sudo install -m 0755 $SCRIPT_DIR/$SCRIPT_NAME /usr/bin/setup-home-links
+
+    # Creation of ~/.config WSL2 path at %USERPROFILE%
+    mkdir -p $USERPROFILE/.config && ln -sf $USERPROFILE/.config ~/.config
+    rm -f ~/.config/.config
+
+    # Creation of ~/.gnupg WSL2 path at %USERPROFILE%
+    mkdir -p $USERPROFILE/.gnupg && ln -sf $USERPROFILE/.gnupg ~/.gnupg
+    rm -f ~/.gnupg/.gnupg
+
+    # Creation of ~/.local WSL2 path at %USERPROFILE%
+    mkdir -p $USERPROFILE/.local && ln -sf $USERPROFILE/.local ~/.local
+    rm -f ~/.local/.local
+
+    # Creation of ~/.ssh WSL2 path at %USERPROFILE%
+    mkdir -p $USERPROFILE/.ssh && ln -sf $USERPROFILE/.ssh ~/.ssh
+    rm -f ~/.ssh/.ssh
+
+    # Creation of ~/.netrc WSL2 path at %USERPROFILE%; obtain personal web token at bitbucket-dc
+    touch $USERPROFILE/.netrc && ln -sf $USERPROFILE/.netrc ~/.netrc
+
+    # example content ~/.netrc
+    # machine host.domain.com
+    # login root
+    # password BBDC-webtoken
+    # EOF
+
+fi
+
+# installation of host development dependency
+
+mkdir -p ~/.local/bin
+curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.local/bin/repo
+chmod a+rx ~/.local/bin/repo
+
+case $ID in
+
+almalinux*)
+
+    sudo dnf install -y epel-release
+
+    sudo yum install -y dnf-plugins-core
+
+    sudo dnf config-manager --set-enabled crb
+
+    sudo dnf makecache
+
+    sudo dnf upgrade -y
+
+    sudo dnf install -y gawk make wget tar bzip2 gzip python3 unzip perl patch \
+        diffutils diffstat git cpp gcc gcc-c++ glibc-devel texinfo chrpath \
+        ccache socat perl-Data-Dumper perl-Text-ParseWords perl-Thread-Queue \
+        python3-pip python3-GitPython python3-jinja2 python3-pexpect xz which \
+        rpcgen zstd lz4 cpio glibc-langpack-en libacl git-lfs hostname
+
+    ;;
+
+debian* | ubuntu*)
+
+    sudo apt update -y
+
+    sudo apt upgrade -y
+
+    sudo apt install -y gawk wget git diffstat unzip texinfo gcc build-essential \
+        chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils \
+        iputils-ping python3-git python3-jinja2 python3-subunit zstd liblz4-tool \
+        file locales libacl1 git-lfs make libxml2-utils
+
+    sudo locale-gen en_US.UTF-8
+
+    ;;
+
+esac
+
+echo "Run $SCRIPT_NAME to repeat steps."
+echo "Setup keys for git, gpg, and ssh if not already done."
+echo "Upon completion, terminate the wsl2 instance and restart."

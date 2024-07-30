@@ -1,0 +1,89 @@
+// vscode workspace
+
+{
+    "workbench.editor.restoreViewState": false,
+    "diffEditor.ignoreTrimWhitespace": true,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.associations": {
+        "*^": "text",
+        "*.conf": "bitbake",
+        "*.inc": "bitbake",
+        "*.conf.example": "bitbake"
+    },
+    "files.trimTrailingWhitespaceInRegexAndStrings": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.repo/manifests.git": true,
+        "**/.repo/repo*": true,
+        "**/.repo/*.json": true,
+        "**/.repo/project*": true,
+        "**/.repo/TRACE_FILE": true,
+        "**/build/*/cache": true,
+        "**/build/*/tmp*": true,
+        "**/build/downloads": true,
+        "**/build/sstate-cache": true
+    },
+    "files.watcherExclude": {
+        "**/__pycache__": true,
+        "**/.repo/manifests.git": true,
+        "**/.repo/repo*": true,
+        "**/.repo/*.json": true,
+        "**/.repo/project*": true,
+        "**/.repo/TRACE_FILE": true,
+        "**/build/*/cache": true,
+        "**/build/*/tmp*": true,
+        "**/build/downloads": true,
+        "**/build/sstate-cache": true
+    },
+    "git.detectSubmodulesLimit": 3,
+    "git.enableCommitSigning": true,
+    "git.repositoryScanMaxDepth": 4,
+    "git.ignoredRepositories": [
+        ".git",
+	    "git",
+        "repo",
+        "tmp*"
+    ],
+    "workbench.editorLargeFileConfirmation": 1024,
+    "python.analysis.stubPath": "",
+    "python.analysis.exclude": [
+        "**/"
+    ],
+    "python.analysis.indexing": false,
+    "python.analysis.supportRestructuredText": false,
+    "python.analysis.enablePytestSupport": false,
+    "python.analysis.experimentalserver": false,
+    "python.analysis.userFileIndexingLimit": 0,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/layers/poky/bitbake/lib",
+        "${workspaceFolder}/layers/poky/meta/lib"
+    ],
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/layers/poky/bitbake/lib",
+        "${workspaceFolder}/layers/poky/meta/lib"
+    ],
+    "bitbake.parseOnSave": false,
+    "bitbake.pathToBitbakeFolder": "${workspaceFolder}/layers/poky/bitbake",
+    "bitbake.commandWrapper": "",
+    "bitbake.disableConfigModification": true,
+    "bitbake.disableEmbeddedLanguagesFiles": false,
+    "bitbake.pathToEnvScript": "${workspaceFolder}/scripts/oe-init-build-env",
+    "bitbake.sdkImage": "",
+    "bitbake.buildConfigurations": [
+        {
+            "name": "MACHINE=sbc-gene-bt05",
+            "pathToBuildFolder": "${workspaceFolder}/build/sbc-gene-bt05",
+            "shellEnv": {
+                "DISTRO": "distro-core",
+                "MACHINE": "sbc-gene-bt05"
+            }
+        },
+    ],
+    "bitbake.workingDirectory": "${workspaceFolder}",
+    "bitbake.pathToBuildFolder": "${workspaceFolder}",
+}
