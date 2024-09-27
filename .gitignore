@@ -1,17 +1,14 @@
+# .gitignore
+
 __pycache__/
 .git/
-.repo/manifests.git/
-.repo/project-objects/
-.repo/projects/
-.repo/*.json
-.repo/manifest.xml
-.repo/projects_list
-.repo/TRACE_FILE
-build/
-git/
-tmp*/
-*.vscode
-!/.vscode
+
+/.repo/
+!/.repo/manifests/
+/build/
+/layers/
+!/layers/meta-distro
+
 *.swp
 *.un~
 *~

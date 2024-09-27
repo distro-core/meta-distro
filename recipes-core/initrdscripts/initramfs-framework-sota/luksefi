@@ -1,0 +1,28 @@
+#!/bin/sh
+
+set +m
+
+EFIVAR=/bin/efivar
+
+luksefi_enabled() {
+    if [ -x "$EFIVAR" ]; then
+        if [ -d "/sys/firmware/efi/efivars" ]; then
+            if [ -z "$LUKS_KEYFILE" ]; then
+                info "luksefi: enabled"
+                return 0
+            fi
+        fi
+    fi
+    info "luksefi: disabled"
+    return 1
+}
+
+luksefi_run() {
+    info "luksefi: run"
+    LUKS_KEYFILE=$(mktemp -u /tmp/luks-key.XXXXXX)
+    if ! efivar --name=8be4df61-93ca-11d2-aa0d-00e098032b8c-LuksKey --datafile=$LUKS_KEYFILE; then
+        luks_keyfile_shred
+        LUKS_KEYFILE=""
+    fi
+    info "luksefi: finished"
+}

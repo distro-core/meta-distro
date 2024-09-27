@@ -1,0 +1,63 @@
+# conf/templates/distro-musl-no-gui/local.conf.sample
+
+CONF_VERSION = "2"
+
+DISTRO ?= "distro-musl"
+
+MACHINE ?= "qemux86-64"
+
+BBMULTICONFIG ?= ""
+
+# CACHE = "${TOPDIR}/../cache"
+
+# BB_CACHEDIR = "${TOPDIR}/../cache"
+
+DL_DIR ?= "${TOPDIR}/../downloads"
+
+SSTATE_DIR ?= "${TOPDIR}/../sstate-cache"
+
+TMPDIR = "${TOPDIR}/tmp-${MACHINE}"
+
+# BB_CONSOLELOG = "${TOPDIR}/build.log"
+
+# BB_CACHEDIR = "${TOPDIR}/../cache"
+
+# CACHE = "${TOPDIR}/../cache"
+
+PERSISTENT_DIR = "${TOPDIR}/../cache"
+
+# DEPLOY_DIR = "${TMPDIR}/deploy"
+
+PACKAGE_CLASSES ?= "package_rpm"
+
+USER_CLASSES ?= "buildstats"
+
+EXTRA_USER_CLASSES ??= ""
+
+USER_CLASSES:append = " ${EXTRA_USER_CLASSES}"
+
+PATCHRESOLVE = "noop"
+
+BB_DISKMON_DIRS ??= "\
+    STOPTASKS,${TMPDIR},1G,100K \
+    STOPTASKS,${DL_DIR},1G,100K \
+    STOPTASKS,${SSTATE_DIR},1G,100K \
+    STOPTASKS,/tmp,100M,100K \
+    HALT,${TMPDIR},100M,1K \
+    HALT,${DL_DIR},100M,1K \
+    HALT,${SSTATE_DIR},100M,1K \
+    HALT,/tmp,10M,1K"
+
+PACKAGECONFIG:append:pn-qemu-system-native = " sdl"
+
+########################################
+
+MANIFEST_BRANCH ?= "ENVIRONMENT-UNSET"
+MANIFEST_COMMIT_ID ?= "ENVIRONMENT-UNSET"
+MANIFEST_NAME ?= "ENVIRONMENT-UNSET"
+
+require conf/distro/sota.conf.inc
+
+require conf/distro/include/distro-common.conf
+
+# ---
