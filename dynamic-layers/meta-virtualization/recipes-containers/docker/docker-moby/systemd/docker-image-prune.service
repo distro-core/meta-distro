@@ -1,0 +1,7 @@
+[Unit]
+Description=Docker Image Prune
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker image prune --force
+WorkingDirectory=/tmp

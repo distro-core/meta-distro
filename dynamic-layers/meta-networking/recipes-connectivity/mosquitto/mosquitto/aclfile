@@ -1,0 +1,14 @@
+# user anonymous
+topic read $SYS/#
+topic read #
+topic write pr/#
+
+user daemon
+topic read $SYS/#
+topic #
+
+user application
+topic read #
+topic write pr/data/application/#
+
+pattern write $SYS/broker/connection/%c/state
