@@ -1,0 +1,12 @@
+do_compile() {
+    if [ -n "${INITRAMFS_IMAGE}" ]; then
+        if [ "${INITRAMFS_IMAGE_BUNDLE}" = "1" ]; then
+	        cp -L ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${INITRAMFS_LINK_NAME}${KERNEL_ARTIFACT_BIN_EXT} ${B}/${KERNEL_IMAGETYPE}
+	    else
+	        cp -L ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}${KERNEL_ARTIFACT_BIN_EXT} ${B}/${KERNEL_IMAGETYPE}
+	        cp -L ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.cpio.gz ${B}/initrd
+	    fi
+    else
+	    cp -L ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}${KERNEL_ARTIFACT_BIN_EXT} ${B}/${KERNEL_IMAGETYPE}
+    fi
+}

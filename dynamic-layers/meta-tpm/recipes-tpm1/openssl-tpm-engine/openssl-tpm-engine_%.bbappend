@@ -1,0 +1,1 @@
+FILES:${PN}:append = " ${libdir}/"
