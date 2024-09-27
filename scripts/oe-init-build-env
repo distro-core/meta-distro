@@ -1,0 +1,75 @@
+# source oe-init-build-env
+# primary use case is setup for visual studio code
+# https://marketplace.visualstudio.com/items?itemName=yocto-project.yocto-bitbake
+# used from top directory of repo layout; working folder is under builds/MACHINE
+
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_NAME=$0
+
+if [ $sourced -gt 0 ]; then
+
+export DISTRO=${DISTRO:-distro-core}
+export MACHINE=${MACHINE:-sbc-gene-bt05}
+
+export BB_NUMBER_THREADS="$(( $(nproc) * 5 / 8 ))"
+export PARALLEL_MAKE="-j$(( $(nproc) * 5 / 8 ))"
+
+dl_dir=$(realpath ${SCRIPT_DIR}/../../../build/downloads)
+sstate_cache=$(realpath ${SCRIPT_DIR}/../../../build/sstate-cache)
+topdir=$(realpath ${SCRIPT_DIR}/../../../build/${MACHINE})
+poky_dir=$(realpath ${SCRIPT_DIR}/../../../layers/poky)
+template_dir=$(realpath ${SCRIPT_DIR}/../../../layers/meta-distro/conf/templates)
+
+mkdir -p $dl_dir
+mkdir -p $sstate_cache
+
+mkdir -p $topdir
+mkdir -p $topdir/conf
+
+if [ ! -h $topdir/conf/bblayers.conf ]; then
+    cp -f $template_dir/${DISTRO}/bblayers.conf.sample $topdir/conf/bblayers.conf
+fi
+
+if [ ! -h $topdir/conf/conf-notes.txt ]; then
+    cp -f $template_dir/${DISTRO}/conf-notes.txt $topdir/conf/conf-notes.txt
+fi
+
+if [ ! -h $topdir/conf/local.conf ]; then
+    cp -f $template_dir/${DISTRO}/local.conf.sample $topdir/conf/local.conf
+fi
+
+TEMPLATECONF=$template_dir/${DISTRO} \
+    source $poky_dir/oe-init-build-env $topdir
+
+additionsadd() {
+    if [[ " $BB_ENV_PASSTHROUGH_ADDITIONS " != *" $1 "* ]]; then
+        BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS:+"$BB_ENV_PASSTHROUGH_ADDITIONS "}$1"
+    fi
+}
+
+additionsadd DISTRO
+additionsadd MACHINE
+additionsadd DEPLOY_DIR
+additionsadd BB_GENERATE_MIRROR_TARBALLS
+additionsadd BB_GENERATE_SHALLOW_TARBALLS
+additionsadd BB_NO_NETWORK
+additionsadd BB_NICE_LEVEL
+additionsadd BB_TASK_NICE_LEVEL
+additionsadd BB_NUMBER_THREADS
+additionsadd PARALLEL_MAKE
+additionsadd MASTER_KEYS_DIR
+additionsadd OSTREE_BRANCHNAME
+additionsadd OSTREE_REPO
+additionsadd MANIFEST_NAME
+additionsadd MANIFEST_BRANCH
+additionsadd MANIFEST_COMMITID
+
+else
+
+    echo "usage: DISTRO=distro-core MACHINE=sbc-gene-bt05 BB_NUMBER_THREADS=10 PARALLEL_MAKE=-j10 . $SCRIPT_NAME"
+
+fi
+
+unset -v SCRIPT_DIR SCRIPT_NAME
