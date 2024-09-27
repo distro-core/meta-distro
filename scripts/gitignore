@@ -1,0 +1,22 @@
+__pycache__/
+.git/
+git/
+/README.distro.md
+/.repo/
+/.vscode
+/artifacts/
+/build/
+/layers/
+!/layers/meta-distro
+/scripts/images-build
+/scripts/oe-init-build-env
+*.swp
+*.un~
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+.history
+# ignore workflows temporary
+workflows-tmp*

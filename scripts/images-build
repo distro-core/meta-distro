@@ -1,0 +1,252 @@
+#!/bin/bash
+
+set -o errexit
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_NAME=$(basename $0)
+
+VALID_ARGS=$(getopt -o habc:dsD:M:Tt::p:F --long help,preserve-artifacts,preserve-build,clean-targets:,clean-download,clean-sstate,distro:,machine:,target:,target-flags:,proxy:,fetch-downloads -- "$@")
+if [[ $? -ne 0 ]]; then
+    exit 1
+fi
+
+eval set -- "$VALID_ARGS"
+while [ : ]; do
+    case "$1" in
+        -h | --help)
+            echo "Usage: $SCRIPT_NAME [--proxy='proxy'] [--machine='<machine_list>'] [--target='<target_list>']"
+            echo "--distro='distro'                set distro"
+            echo "--machine='<machine_list>'       set machine_list"
+            echo "--target='<target_list>'         set target_list"
+            echo "--target-flags='<flags_list>'    set target_flags"
+            echo "--preserve-artifacts             preserve artifacts"
+            echo "--preserve-build                 preserve build"
+            echo "--clean-download                 clean shared downloads"
+            echo "--clean-sstate                   clean shared sstate-cache"
+            echo "--clean-targets='<target_list>'  clean target_list"
+            echo "--proxy='proxy'                  set proxy url"
+            exit 0
+            ;;
+        -a | --preserve-artifacts)
+            preserve_artifacts=1
+            shift
+            ;;
+        -b | --preserve-build)
+            preserve_build=1
+            shift
+            ;;
+        -c | --clean-target)
+            clean_targets=( $2 )
+            shift 2
+            ;;
+        -d | --clean-download)
+            clean_downloads=1
+            shift
+            ;;
+        -s | --clean-sstate)
+            clean_sstate=1
+            shift
+            ;;
+        -D | --distro)
+            distros=( $2 )
+            shift 2
+            ;;
+        -M | --machine)
+            machines=( $2 )
+            shift 2
+            ;;
+        -T | --target)
+            targets=( $2 )
+            shift 2
+            ;;
+        -t | --target-flags)
+            targets_flags=( $2 )
+            shift 2
+            ;;
+        -p | --proxy)
+            proxy=$2
+            shift 2
+            ;;
+        -F | --fetch-downloads)
+            targets_flags=( --runall=fetch ${targets_flags[*]} )
+            shift
+            ;;
+        -H | --hashserv)
+            hashserv=$2
+            shift 2
+            ;;
+        -P | --prserv)
+            prserv=$2
+            shift 2
+            ;;
+        --) shift
+            break
+            ;;
+    esac
+done
+
+clean_dir() {
+    echo "INFO: clean $1"
+    if [ -d $1 ]; then
+        rm -fr $1/
+    fi
+}
+
+additionsadd() {
+    if [[ " $BB_ENV_PASSTHROUGH_ADDITIONS " != *" $1 "* ]]; then
+        BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS:+"$BB_ENV_PASSTHROUGH_ADDITIONS "}$1"
+    fi
+    if [[ -n "$2" ]]; then
+        export $1=$2
+    fi
+}
+
+# if [ -n "${clean_sstate}" -a -n "${preserve_build}" ]; then
+#     echo "ERROR: mutually exclusive options --clean-sstate --preserve-build"
+#     exit 1
+# fi
+
+if [  ${#distros[*]} -eq 0 ]; then
+    distros=( distro-core )
+    echo "INFO: set default distros to ${distros[*]}"
+fi
+
+if [ ${#machines[*]} -eq 0 ]; then
+    machines=( com-cexpress-bt com-cexpress-sl sbc-gene-bt05 )
+    echo "INFO: set default machines to ${machines[*]}"
+fi
+
+if [ ${#targets[*]} -eq 0 ]; then
+    targets=( distro-image distro-sdk-image )
+    echo "INFO: set default targets to ${targets[*]}"
+fi
+
+if [ -n "${proxy}" ]; then
+    proto="$(echo ${proxy} | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+    url="$(echo ${proxy/$proto/})"
+    user="$(echo $url | grep @ | cut -d@ -f1)"
+    hostport="$(echo ${url/$user@/} | cut -d/ -f1)"
+    host="$(echo $hostport | sed -e 's,:.*,,g')"
+    port="$(echo $hostport | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
+    path="$(echo $url | grep / | cut -d/ -f2-)"
+    if socat /dev/null TCP:$host:$port >/dev/null; then
+        echo "INFO: set proxy to ${proxy}"
+        export http_proxy=${proxy}
+        export https_proxy=${proxy}
+        export no_proxy="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.0.0.0/8"
+    fi
+fi
+
+additionsadd BB_GENERATE_MIRROR_TARBALLS
+additionsadd BB_GENERATE_SHALLOW_TARBALLS
+additionsadd BB_HASHSERVE
+additionsadd BB_NICE_LEVEL
+additionsadd BB_NO_NETWORK
+additionsadd BB_NUMBER_THREADS
+additionsadd BB_TASK_NICE_LEVEL
+additionsadd MANIFEST_BRANCH
+additionsadd MANIFEST_COMMITID
+additionsadd MANIFEST_NAME $(xmllint --xpath "/manifest/include/@name" .repo/manifest.xml | grep -Po 'name="\K[^"]*')
+additionsadd MASTER_KEYS_DIR
+additionsadd METADIR
+additionsadd OSTREE_BRANCHNAME
+additionsadd OSTREE_REPO
+additionsadd PARALLEL_MAKE
+additionsadd SOURCE_MIRROR_URL
+additionsadd SSTATE_CACHE_DIR
+additionsadd SSTATE_MIRRORS
+
+# additionsadd MASTER_KEYS_DIR=$(pwd)/layers/meta-distro/files/user-keys
+# additionsadd BB_NUMBER_THREADS="${BB_NUMBER_THREADS:-$(( $(nproc) * 3 / 4 ))}"
+# additionsadd PARALLEL_MAKE="${PARALLEL_MAKE:--j$(( BB_NUMBER_THREADS + 0 ))}"
+
+if [ -n "${clean_downloads}" ]; then
+    clean_dir build/downloads
+else
+    echo "INFO: retain build/downloads"
+fi
+
+if [ -n "${clean_sstate}" ]; then
+    clean_dir build/sstate-cache
+else
+    echo "INFO: retain build/sstate-cache"
+    # layers/poky/scripts/sstate-cache-management.py --cache-dir=build/sstate-cache --yes --remove-orphans
+fi
+
+for distro in ${distros[*]}; do
+    for machine in ${machines[*]}; do
+
+        artifacts_dir=artifacts/${distro}-${machine}  # aka DEPLOY_DIR
+        build_dir=build/${distro}-${machine}          # aka TOPDIR
+
+        if [ -n "${preserve_artifacts}" ]; then
+            echo "INFO: retain ${artifacts_dir}"
+        else
+            clean_dir ${artifacts_dir}
+        fi
+
+        if [ -n "${preserve_build}" ]; then
+            echo "INFO: retain ${build_dir}"
+            clean_dir ${build_dir}/conf
+        else
+            clean_dir ${build_dir}
+        fi
+
+    done
+done
+
+# repo forall -c "git config --local url."https://".insteadOf git://" || true
+
+for distro in ${distros[*]}; do
+    for machine in ${machines[*]}; do
+
+        artifacts_dir=artifacts/${distro}-${machine}  # aka DEPLOY_DIR
+        build_dir=build/${distro}-${machine}          # aka TOPDIR
+
+        mkdir -p ${artifacts_dir} ${build_dir}
+
+        additionsadd DISTRO ${distro}
+        additionsadd MACHINE ${machine}
+        additionsadd DEPLOY_DIR $(pwd)/${artifacts_dir}
+
+        orig_cwd=$(pwd)
+
+        {
+        TEMPLATECONF=${TEMPLATECONF:-$(pwd)/layers/meta-distro/conf/templates/${distro}} \
+            source layers/poky/oe-init-build-env ${build_dir}
+        } >/dev/null
+
+        rm -f *.log *.lock *.sock
+
+        echo "INFO: BEGIN ${MANIFEST_NAME} ${distro} ${machine} ${targets[*]}"
+
+        # bitbake-hashserv --database ${build_dir}/../hashserv.db --bind 0.0.0.0:8686 & && hashserv_pid=$!
+
+        # bitbake-prserv --file ${build_dir}/../prserv.db --host 0.0.0.0 --port 8585 --start
+
+        if [ ${#clean_targets[*]} -ne 0 ]; then
+            command -p time bitbake -c cleansstate ${clean_targets[*]}
+        fi
+
+        command -p time bitbake ${targets_flags[*]} ${targets[*]}
+
+        # bitbake-prserv --file ${build_dir}/../prserv.db --host 0.0.0.0 --port 8585 --stop
+
+        # kill $hashserv_pid
+
+        echo "INFO: END ${MANIFEST_NAME} ${distro} ${machine} ${targets[*]}"
+
+        rm -f bitbake-cookerdaemon.log
+
+        touch bitbake.log
+        cp -f bitbake*.log ${DEPLOY_DIR}
+
+        cd ${orig_cwd}
+
+    done
+done
+
+# DAYS=14
+# find build/sstate-cache -type f -mtime +${DAYS} -delete
+
+exit 0

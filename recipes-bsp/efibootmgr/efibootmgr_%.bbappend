@@ -1,0 +1,1 @@
+EFIDIR = "${EFI_FILES_PATH}"

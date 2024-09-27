@@ -1,0 +1,46 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_NAME=$(basename $0)
+
+git_config=~/.config/git/config
+
+mkdir -p $(dirname ~/.config/git/config)
+touch ~/.config/git/config
+
+cp -f ${SCRIPT_DIR}/commit.template $(dirname ~/.config/git/config)/commit.template
+
+[[ $(git config --get user.name) ]] || git config --file ~/.config/git/config user.name "Firstname Surname"
+[[ $(git config --get user.email) ]] || git config --file ~/.config/git/config user.email "username@users.noreply.github.com"
+[[ $(git config --get user.signingkey) ]] || git config --file ~/.config/git/config user.signingkey "GPG-KEY-ID"
+
+echo "Edit ~/.config/git/config and set appropriate values for the user, aka GPG-KEY-ID"
+
+git config --file ~/.config/git/config commit.gpgsign "true"
+git config --file ~/.config/git/config commit.template "$(dirname ~/.config/git/config)/commit.template"
+
+git config --file ~/.config/git/config core.editor "code"
+git config --file ~/.config/git/config core.autocrlf "false"
+
+git config --file ~/.config/git/config http.sslVerify "true"
+git config --file ~/.config/git/config --unset http.version
+git config --file ~/.config/git/config --unset http.sslVersion 
+git config --file ~/.config/git/config --unset http.lowSpeedLimit 
+git config --file ~/.config/git/config --unset http.lowSpeedTime 
+
+git config --file ~/.config/git/config init.defaultBranch "main"
+
+git config --file ~/.config/git/config trailer.sign.key "Signed-off-by"
+
+git config --file ~/.config/git/config url.'https://'.insteadOf git://
+
+git config --file ~/.config/git/config difftool.vscode.cmd 'code --wait --diff $LOCAL $REMOTE'
+git config --file ~/.config/git/config diff.tool vscode
+
+git config --file ~/.config/git/config merge.tool vscode
+git config --file ~/.config/git/config mergetool.vscode.cmd 'code --wait $MERGED'
+
+git config --file ~/.config/git/config includeif.'gitdir:**/github/'.path ~/.config/git/config-github
+git config --file ~/.config/git/config includeii.'gitdir:**/gitlab/'.path ~/.config/git/config-gitlab
+
+exit 0

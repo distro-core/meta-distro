@@ -1,0 +1,6 @@
+[Unit]
+Type=simple
+ExecStart=/usr/bin/klishd -d
+
+[Install]
+WantedBy=multi-user.target
