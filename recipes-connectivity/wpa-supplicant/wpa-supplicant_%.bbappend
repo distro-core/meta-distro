@@ -1,0 +1,6 @@
+# Modify CONFIG
+
+# CONFIG_WEP=y
+# CONFIG_WPS=y
+# CONFIG_WPS_UPNP=y
+# CONFIG_WPS_NFC=y
