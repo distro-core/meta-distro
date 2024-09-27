@@ -1,0 +1,6 @@
+RDEPENDS:${PN}:append = " ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
+
+RRECOMMENDS:${PN}:append = " ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
+
+# Remove undesired EFI_PROVIDER from MACHINE.conf
+RDEPENDS:${PN}:remove = "none"

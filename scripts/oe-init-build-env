@@ -1,0 +1,60 @@
+: source scripts/oe-init-build-env
+
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+
+if [[ $sourced -gt 0 ]]; then
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_NAME=$0
+
+poky_dir=$(realpath ${SCRIPT_DIR}/../../../layers/poky)
+template_dir=$(realpath ${SCRIPT_DIR}/../../../layers/meta-distro/conf/templates)
+
+additionsadd() {
+    if [[ " $BB_ENV_EXTRAWHITE " != *" $1 "* ]]; then
+        BB_ENV_EXTRAWHITE="${BB_ENV_EXTRAWHITE:+"$BB_ENV_EXTRAWHITE "}$1"
+    fi
+    if [[ " $BB_ENV_PASSTHROUGH_ADDITIONS " != *" $1 "* ]]; then
+        BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS:+"$BB_ENV_PASSTHROUGH_ADDITIONS "}$1"
+    fi
+    if [[ -n "$2" ]]; then
+        export $1="$2"
+    fi
+}
+
+if [[ -z "${topdir}" ]]; then
+topdir=$(realpath -m ${SCRIPT_DIR}/../../../build/${DISTRO}) # aka TOPDIR
+fi
+
+additionsadd DISTRO
+additionsadd MACHINE
+additionsadd BBMULTICONFIG
+
+additionsadd DL_DIR
+additionsadd SSTATE_DIR
+additionsadd EXTRA_USER_CLASSES
+additionsadd SOURCE_MIRROR_URL
+additionsadd SSTATE_MIRRORS
+
+additionsadd BB_NUMBER_THREADS
+additionsadd PARALLEL_MAKE
+additionsadd BB_NO_NETWORK
+
+additionsadd MANIFEST_BRANCH
+additionsadd MANIFEST_COMMIT_ID
+additionsadd MANIFEST_NAME
+additionsadd MANIFEST_SERIAL
+
+# additionsadd MASTER_KEYS_DIR # $(pwd)/layers/meta-distro/files/user-keys
+# additionsadd OSTREE_BRANCHNAME
+# additionsadd OSTREE_REPO
+
+TEMPLATECONF=${TEMPLATECONF:-${template_dir}/${DISTRO}} source ${poky_dir}/oe-init-build-env ${topdir}
+
+else
+
+    printf "usage:\nexport DISTRO=$DISTRO\nexport source $SCRIPT_NAME"
+
+fi
+
+unset -v SCRIPT_DIR SCRIPT_NAME poky_dir template_dir

@@ -1,0 +1,79 @@
+# conf/templates/distro-core/bblayers.conf.sample
+
+# DISTROOVERRIDES and MACHINEOVERRIDES are not supported in this config
+# as they have not yet been set in the bitbake environment.
+
+POKY_BBLAYERS_CONF_VERSION = "2"
+
+# Path containing meta layers, relative to build/topdir
+METADIR ?= "${TOPDIR}/../../layers"
+
+# Pathing order is important here; the optional layers are pathed as expected in relation
+# to the other required layers. The operator used in the context of BBLAYERS is expected
+# to be "+=" to have a deterministic search order in the pathing established by bitbake.
+
+BBLAYERS  = "${METADIR}/meta-distro"
+BBLAYERS += "${METADIR}/poky/meta"
+BBLAYERS += "${METADIR}/poky/meta-poky"
+BBLAYERS += "${METADIR}/meta-updater"
+BBLAYERS += "${METADIR}/meta-virtualization"
+
+# meta-openembedded
+BBLAYERS += "${METADIR}/meta-openembedded/meta-oe"
+BBLAYERS += "${METADIR}/meta-openembedded/meta-filesystems"
+BBLAYERS += "${METADIR}/meta-openembedded/meta-networking"
+BBLAYERS += "${METADIR}/meta-openembedded/meta-perl"
+BBLAYERS += "${METADIR}/meta-openembedded/meta-python"
+# BBLAYERS += "${METADIR}/meta-openembedded/meta-gnome"
+# BBLAYERS += "${METADIR}/meta-openembedded/meta-multimedia"
+# BBLAYERS += "${METADIR}/meta-openembedded/meta-webserver"
+# BBLAYERS += "${METADIR}/meta-openembedded/meta-xfce"
+
+# perform layer inclusion from content of manifest
+
+# Pattern used to include layer when present in filesystem
+# BBLAYERS += "${@'${METADIR}/meta-layer' if os.path.isdir('${METADIR}/meta-layer') else ''}"
+
+# meta-sdk
+BBLAYERS += "${@'${METADIR}/meta-clang' if os.path.isdir('${METADIR}/meta-clang') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-mingw' if os.path.isdir('${METADIR}/meta-mingw') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-rust' if os.path.isdir('${METADIR}/meta-rust') else ''}"
+
+# meta-secure-core
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta' if os.path.isdir('${METADIR}/meta-secure-core/meta') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta-secure-core-common' if os.path.isdir('${METADIR}/meta-secure-core/meta-secure-core-common') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta-efi-secure-boot' if os.path.isdir('${METADIR}/meta-secure-core/meta-efi-secure-boot') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta-encrypted-storage' if os.path.isdir('${METADIR}/meta-secure-core/meta-encrypted-storage') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta-integrity' if os.path.isdir('${METADIR}/meta-secure-core/meta-integrity') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta-signing-key' if os.path.isdir('${METADIR}/meta-secure-core/meta-signing-key') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta-tpm' if os.path.isdir('${METADIR}/meta-secure-core/meta-tpm') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-secure-core/meta-tpm2' if os.path.isdir('${METADIR}/meta-secure-core/meta-tpm2') else ''}"
+
+# meta-security
+BBLAYERS += "${@'${METADIR}/meta-security' if os.path.isdir('${METADIR}/meta-security') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-security/meta-integrity' if os.path.isdir('${METADIR}/meta-security/meta-integrity') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-security/meta-tpm' if os.path.isdir('${METADIR}/meta-security/meta-tpm') else ''}"
+
+# meta-selinux
+BBLAYERS += "${@'${METADIR}/meta-selinux' if os.path.isdir('${METADIR}/meta-selinux') else ''}"
+
+# meta-bsp
+BBLAYERS += "${@'${METADIR}/meta-arm' if os.path.isdir('${METADIR}/meta-arm') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-freescale' if os.path.isdir('${METADIR}/meta-freescale') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-freescale-3rdparty' if os.path.isdir('${METADIR}/meta-freescale-3rdparty') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-intel' if os.path.isdir('${METADIR}/meta-intel') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-raspberrypi' if os.path.isdir('${METADIR}/meta-raspberrypi') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-riscv' if os.path.isdir('${METADIR}/meta-riscv') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-st-stm32mp' if os.path.isdir('${METADIR}/meta-st-stm32mp') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-tegra' if os.path.isdir('${METADIR}/meta-tegra') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-ti' if os.path.isdir('${METADIR}/meta-ti') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-xilinx' if os.path.isdir('${METADIR}/meta-xilinx') else ''}"
+BBLAYERS += "${@'${METADIR}/meta-xilinx-tools' if os.path.isdir('${METADIR}/meta-xilinx-tools') else ''}"
+
+# masked recipes (remove greedy match with paths)
+BBMASK += "packagegroup-distro[^/]*\.bbappend$"
+BBMASK += "distro[^/]*\.bbappend$"
+# mask selinux/meta-clang conflicts not handled by nonclangable.conf or conf/distro/include/distro-clang.conf
+BBMASK += "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'uutils-coreutils', '', d)}"
+
+# ---

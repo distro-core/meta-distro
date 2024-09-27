@@ -1,0 +1,51 @@
+{
+    "version": 1,
+    "formatters": {
+        "logfileFormatter": {
+            "()": "bb.msg.BBLogFormatter",
+            "format": "%(asctime)s %(levelname)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        }
+    },
+    "handlers": {
+        "errorlog": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "ERROR",
+            "filename": "bitbake-error.log"
+        },
+        "warnlog": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "WARNING",
+            "filename": "bitbake-warn.log"
+        },
+        "notelog": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "NOTE",
+            "filename": "bitbake.log"
+        },
+        "hashservlog": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "DEBUG",
+            "filename": "hashequiv.log"
+        }
+    },
+    "loggers": {
+        "BitBake": {
+            "handlers": [ "errorlog", "warnlog", "notelog" ]
+        },
+        "BitBake.SigGen.HashEquiv": {
+            "level": "VERBOSE",
+            "handlers": [ "hashservlog" ]
+        },
+        "BitBake.RunQueue.HashEquiv": {
+            "level": "VERBOSE",
+            "handlers": [ "hashservlog" ]
+        }
+    },
+    "bitbake_merge": true,
+    "@disable_existing_loggers": false
+}

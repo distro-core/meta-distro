@@ -1,0 +1,10 @@
+[Unit]
+Description=mlvpn service
+
+[Service]
+Type=simple
+Environment="SCRIPT_ARGS=%I"
+ExecStart=/usr/bin/mlvpn $SCRIPT_ARGS
+
+[Install]
+WantedBy=multi-user.target
