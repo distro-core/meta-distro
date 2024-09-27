@@ -1,0 +1,7 @@
+[Unit]
+Description=Podman Container Prune
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman container prune --force
+WorkingDirectory=/tmp
