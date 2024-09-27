@@ -1,0 +1,2 @@
+# default ownership: default owners for everything in the repo (Unless a later match takes precedence)
+* @distro-core/Developers
