@@ -1,0 +1,1 @@
+%sudo (root:root) NOPASSWD: /sbin/iptables

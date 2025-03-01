@@ -1,0 +1,75 @@
+: source scripts/oe-init-build-env
+
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+
+if [[ $sourced -gt 0 ]]; then
+
+    [[ -z "$SCRIPT_DIR" ]] && SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd ) && SCRIPT_NAME=$0
+
+    poky_dir=$(realpath $SCRIPT_DIR/../../../layers/poky)
+    template_dir=$(realpath $SCRIPT_DIR/../../../layers/meta-distro/conf/templates)
+
+    additionsadd() {
+        if [[ " $BB_ENV_EXTRAWHITE " != *" $1 "* ]]; then
+            BB_ENV_EXTRAWHITE="${BB_ENV_EXTRAWHITE:+"$BB_ENV_EXTRAWHITE "}$1"
+        fi
+        if [[ " $BB_ENV_PASSTHROUGH_ADDITIONS " != *" $1 "* ]]; then
+            BB_ENV_PASSTHROUGH_ADDITIONS="${BB_ENV_PASSTHROUGH_ADDITIONS:+"$BB_ENV_PASSTHROUGH_ADDITIONS "}$1"
+        fi
+        if [[ -n "$2" ]]; then
+            export $1="$2"
+        fi
+    }
+
+    # set sane defaults
+
+    export DISTRO=${DISTRO:-distro-core}
+    export DISTRO_VERSION=${DISTRO_VERSION:-0.0.0}
+    export MACHINE=${MACHINE:-com-cexpress-bt}
+
+    if [[ -d .repo/manifests ]]; then
+        [[ -z "${REPO_MANIFEST_BRANCH}" ]] && export REPO_MANIFEST_BRANCH="$(git -C .repo/manifests rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" | cut -d'/' -f2)"
+        [[ -z "${REPO_MANIFEST_FILE}" ]] && export REPO_MANIFEST_FILE="$(xmllint --xpath "string(//include/@name)" .repo/manifest.xml)"
+    fi
+
+    [[ -z "$topdir" && -n "$1" ]] && topdir=$1 || topdir=build
+
+    # override with environment
+
+    additionsadd DISTRO
+    additionsadd DISTRO_VERSION
+    additionsadd MACHINE
+    additionsadd BBMULTICONFIG
+
+    additionsadd DL_DIR
+    additionsadd SSTATE_DIR
+    additionsadd EXTRA_USER_CLASSES
+    additionsadd EXTRA_PREMIRRORS
+    additionsadd EXTRA_SSTATE_MIRRORS
+
+    additionsadd BB_NUMBER_THREADS
+    additionsadd PARALLEL_MAKE
+
+    additionsadd REPO_MANIFEST_URL
+    additionsadd REPO_MANIFEST_BRANCH 
+    additionsadd REPO_MANIFEST_FILE 
+    additionsadd REPO_MANIFEST_XML 
+
+    additionsadd MEM_PER_CPU_MESSAGE
+
+    # additionsadd MASTER_KEYS_DIR # $(pwd)/layers/meta-distro/files/user-keys
+    # additionsadd OSTREE_BRANCHNAME
+    # additionsadd OSTREE_REPO
+
+    # insure topdir is available
+    mkdir -p $topdir
+
+    # force the use of a template
+    rm -fr $topdir/conf
+
+    # initialize the build
+    TEMPLATECONF=${TEMPLATECONF:-$template_dir/$DISTRO} source $poky_dir/oe-init-build-env $topdir
+
+fi
+
+unset -v poky_dir template_dir topdir

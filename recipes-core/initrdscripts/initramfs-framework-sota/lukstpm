@@ -1,0 +1,48 @@
+#!/bin/sh
+
+set +m
+
+TCSD=/sbin/tcsd
+
+# load_kernel_module crc-ccitt
+# load_kernel_module tpm
+# load_kernel_module tpm-crb
+# load_kernel_module tpm-tis
+# load_kernel_module tpm-tis-i2c
+# load_kernel_module tpm-tis-spi
+# load_kernel_module tpm-tis-core
+# load_kernel_module tpm-atmel
+# load_kernel_module tpm-infineon
+# load_kernel_module tpm-nsc
+# load_kernel_module tpm-i2c-atmel
+# load_kernel_module tpm-i2c-infineon
+# load_kernel_module tpm-i2c-nuvoton
+# load_kernel_module tpm-st33zp24
+
+lukstpm_enabled() {
+    if [ -x "$TCSD" ]; then
+        if [ -z "$LUKS_KEYFILE" ]; then
+            if [  -c "/dev/tpmrm0" || -c "/dev/tpm0" ]; then
+                $TCSD --foreground >/dev/null 2>&1 &
+                info "lukstpm: enabled"
+                return 0
+            fi
+        fi
+    fi
+    info "lukstpm: disabled"
+    return 1
+}
+
+lukstpm_run() {
+    info "lukstpm: run"
+    # LUKS_KEYFILE=$(mktemp -u /tmp/luks-key.XXXXXX)
+    # dd if=/dev/zero of=$LUKS_KEYFILE bs=2048 count=1
+    if [ -c "/dev/tpmrm0" ]; then
+        info "lukstpm: tpm 2.0"
+    elif [ -c "/dev/tpm0" ] then
+        info "lukstpm: tpm 1.2"
+    fi
+    cat /sys/class/tpm/tpm0/caps
+    # pkill -TERM -e $(basename $TCSD)
+    info "lukstpm: finished"
+}

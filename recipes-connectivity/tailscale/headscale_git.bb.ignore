@@ -1,0 +1,39 @@
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+
+SUMMARY = "wireguard vpn server"
+DESCRIPTION = "The easiest, most secure way to use WireGuard and 2FA."
+
+GO_IMPORT = "github.com/juanfont/headscale"
+
+SRC_URI = "git://${GO_IMPORT};branch=main;protocol=https;destdir=${BPN}-${PV}/src/${GO_IMPORT}"
+SRC_URI += "file://config.yaml file://derp.yaml"
+
+SRC_BRANCH = "v0.22.3"
+SRCREV = "b01f1f1867136d9b2d7b1392776eb363b482c525"
+PV = "${SRC_BRANCH}+git${SRCPV}"
+
+LICENSE = "BSD-3-Clause"
+LIC_FILES_CHKSUM = "file://src/${GO_IMPORT}/LICENSE;md5=a672713a9eb730050e491c92edf7984d"
+
+inherit go-mod systemd
+
+do_install:append() {
+    install -d -m 0770 -g headscale ${D}${sysconfdir}/headscale
+    install -d -m 0770 -g headscale ${D}${localstatedir}/lib/headscale
+    install -D -m 0640 -g headscale ${S}/config.yaml ${D}${sysconfdir}/headscale/config.yaml
+    install -D -m 0644 ${S}/src/${GO_IMPORT}/docs/packaging/headscale.systemd.service ${D}${systemd_system_unitdir}/headscale.service
+}
+
+SYSTEMD_SERVICE:${PN} = "headscale.service"
+SYSTEMD_AUTO_ENABLE:${PN} = "disable"
+
+FILES:${PN} += "${GOBIN_FINAL}/ ${sysconfdir}/ ${systemd_system_unitdir}/ ${localstatedir}/"
+
+INSANE_SKIP:${PN}-dev += "file-rdeps"
+
+inherit useradd
+
+USERADD_PACKAGES = "${PN}"
+
+GROUPADD_PARAM:${PN} = "-g 600 headscale ;"
+USERADD_PARAM:${PN} = "-p '*' -u 600 -g 600 headscale ;"

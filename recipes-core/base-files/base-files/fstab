@@ -1,0 +1,11 @@
+/dev/root    /                          auto      defaults                                0  1
+none         /proc                      proc      nodev,noexec,nosuid,hidepid=2           0  0
+none         /dev                       devtmpfs  defaults                                0  0
+none         /dev/pts                   devpts    mode=0620,ptmxmode=0666,gid=5           0  0
+none         /dev/shm                   tmpfs     mode=0755,nodev,nosuid,strictatime      0  0
+none         /run                       tmpfs     mode=0755,nodev,nosuid,strictatime      0  0
+none         /var/volatile              tmpfs     defaults                                0  0
+none         /sys                       sysfs     nodev,noexec,nosuid                     0  0
+none         /sys/firmware/efi/efivars  efivarfs  nodev,noexec,nosuid                     0  0
+none         /tmp                       tmpfs     nodev,nosuid,noexec,mode=1777           0  0
+#

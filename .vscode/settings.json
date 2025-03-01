@@ -1,0 +1,141 @@
+// vscode workspace
+
+{
+    "workbench.editor.restoreViewState": false,
+    "workbench.editorLargeFileConfirmation": 1024,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.associations": {
+        "*^": "text",
+        "*.conf": "bitbake",
+        "*.conf.sample": "bitbake",
+        "*.inc": "bitbake"
+    },
+    "files.trimTrailingWhitespaceInRegexAndStrings": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "files.exclude": {
+        "__pycache__/": true,
+        ".directory": true,
+        ".fuse_hidden*": true,
+        ".git/": true,
+        ".nfs*": true,
+        ".Trash-*": true,
+        "*.swp": true,
+        "*.un~": true,
+        "*~": true,
+        "tmp*": true,
+        "*tmp": true,
+        ".repo/*.json": true,
+        ".repo/*.list": true,
+        ".repo/*.xml": true,
+        ".repo/manifests.git/": true,
+        ".repo/project-objects/": true,
+        ".repo/projects/": true,
+        ".repo/repo/": true,
+        ".repo/TRACE_FILE": true,
+        ".vscode/": true
+    },
+    "files.watcherExclude": {
+        "__pycache__/": true,
+        ".directory": true,
+        ".fuse_hidden*": true,
+        ".git/": true,
+        ".nfs*": true,
+        ".Trash-*": true,
+        "*.swp": true,
+        "*.un~": true,
+        "*~": true,
+        "*tmp": true,
+        "tmp*": true,
+        "build/": true,
+        ".repo/*.json": true,
+        ".repo/*.list": true,
+        ".repo/*.xml": true,
+        ".repo/manifests.git/": true,
+        ".repo/project-objects/": true,
+        ".repo/projects/": true,
+        ".repo/repo/": true,
+        ".repo/TRACE_FILE": true,
+        ".vscode/": true
+    },
+    "git.detectSubmodulesLimit": 3,
+    "git.enableCommitSigning": true,
+    "git.repositoryScanMaxDepth": 2,
+    "git.ignoredRepositories": [
+        ".git",
+        "git"
+    ],
+    "git.repositoryScanIgnoredFolders": [
+        "build/**",
+    ],
+    "git.ignoreLimitWarning": false,
+    "git.detectSubmodules": false,
+    "git.scanRepositories": [
+        "${workspaceFolder}/layers"
+    ],
+    "python.analysis.stubPath": "",
+    "python.analysis.exclude": [
+        "**/__pycache__",
+        "**/node_modules",
+        "**/.repo",
+        "**/.vscode",
+        "**/.vscode-server",
+        "**/build",
+        "*.conf",
+        "*.conf.sample",
+        "*.inc"
+    ],
+    "python.analysis.indexing": false,
+    "python.analysis.supportRestructuredText": false,
+    "python.analysis.enablePytestSupport": false,
+    "python.analysis.userFileIndexingLimit": 0,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/layers/poky/bitbake/lib",
+        "${workspaceFolder}/layers/poky/meta/lib"
+    ],
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/layers/poky/bitbake/lib",
+        "${workspaceFolder}/layers/poky/meta/lib"
+    ],
+    "scm.repositories.visible": 0,
+    "search.exclude": {
+        "**/build": true
+    },
+    "C_Cpp.files.exclude": {
+        "**/build": true
+    },
+    "bitbake.parseOnSave": false,
+    "bitbake.disableConfigModification": true,
+    "bitbake.pathToBitbakeFolder": "${workspaceFolder}/layers/poky/bitbake",
+    "bitbake.pathToEnvScript": "${workspaceFolder}/layers/poky/oe-init-build-env",
+    // "bitbake.pathToBuildFolder": "${workspaceFolder}/build/default",
+    // "bitbake.workingDirectory": "${workspaceFolder}/build/default",
+    "bitbake.sdkImage": "distro-image",
+    "bitbake.buildConfigurations": [
+        {
+            "name": "sbc-gene-bt05",
+            "pathToBuildFolder": "${workspaceFolder}/build/distro-core",
+            "workingDirectory": "${workspaceFolder}/build/distro-core",
+            "shellEnv": {
+                "DISTRO": "distro-core",
+                "MACHINE": "sbc-gene-bt05"
+            }
+        },
+        {
+            "name": "sbc-gene-raspberrypi5",
+            "pathToBuildFolder": "${workspaceFolder}/build/distro-core",
+            "workingDirectory": "${workspaceFolder}/build/distro-core",
+            "shellEnv": {
+                "DISTRO": "distro-core",
+                "MACHINE": "sbc-gene-raspberrypi5"
+            }
+        }
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+
+    },
+}

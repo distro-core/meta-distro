@@ -1,0 +1,7 @@
+[Unit]
+Type=forking
+PIDFile=/var/run/konfd.pid
+ExecStart=/usr/bin/konfd
+
+[Install]
+WantedBy=multi-user.target

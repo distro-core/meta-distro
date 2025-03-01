@@ -1,0 +1,1 @@
+RCONFLICTS:${PN} += "systemd-boot"
