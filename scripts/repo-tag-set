@@ -1,0 +1,4 @@
+#!/bin/bash
+
+git tag --force --sign --message "Version v0" v0
+git push --force --tags
