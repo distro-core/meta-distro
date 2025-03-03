@@ -1,0 +1,5 @@
+#!/bin/bash
+
+git add .
+git commit --edit --signoff --gpg-sign --amend 
+git push --force --all
