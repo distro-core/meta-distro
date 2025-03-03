@@ -1,0 +1,44 @@
+#!/bin/sh
+
+set +m
+
+ostreepost_enabled() {
+    info "ostreepost: enabled"
+    return 0
+}
+
+ostreepost_run() {
+    info "ostreepost: run"
+    if [ -b "/dev/disk/by-uuid/$FSYS_DEV_UUID_XBOOTLDR" ]; then
+        info "ostreepost: mounting xbootldr efi"
+        mkdir -p $ROOTFS_DIR/boot
+        mount -o rw,relatime,nodev,nosuid,noexec UUID=$FSYS_DEV_UUID_XBOOTLDR $ROOTFS_DIR/boot >/dev/null 2>&1 || true
+        mkdir -p $ROOTFS_DIR/boot/efi
+        mount -o rw,relatime,nodev,nosuid,noexec UUID=$FSYS_DEV_UUID_ESP_FSTAB $ROOTFS_DIR/boot/efi >/dev/null 2>&1 || true
+    else
+        info "ostreepost: mounting efi"
+        mkdir -p $ROOTFS_DIR/boot
+        mount -o rw,relatime,nodev,nosuid,noexec UUID=$FSYS_DEV_UUID_ESP_FSTAB $ROOTFS_DIR/boot >/dev/null 2>&1 || true
+    fi
+    if [ -b "/dev/disk/by-uuid/$FSYS_DEV_UUID_VAR" ]; then
+        info "ostreepost: mounting var"
+        mkdir -p /var
+        mount -o rw,relatime UUID=$FSYS_DEV_UUID_VAR /var >/dev/null 2>&1 || true
+    fi
+    if [ -b "/dev/disk/by-uuid/$FSYS_DEV_UUID_LIB" ]; then
+        info "ostreepost: mounting var/lib"
+        mkdir -p /var/lib
+        mount -o rw,relatime UUID=$FSYS_DEV_UUID_LIB /var/lib >/dev/null 2>&1 || true
+    fi
+    if [ -b "/dev/disk/by-uuid/$FSYS_DEV_UUID_LOG" ]; then
+        info "ostreepost: mounting var/log"
+        mkdir -p /var/log
+        mount -o rw,relatime,nodev,nosuid,noexec UUID=$FSYS_DEV_UUID_LOG /var/log >/dev/null 2>&1 || true
+    fi
+    if [ -b "/dev/disk/by-uuid/$FSYS_DEV_UUID_AUDIT" ]; then
+        info "ostreepost: mounting var/log/audit"
+        mkdir -p /var/log/audit
+        mount -o rw,relatime,nodev,nosuid,noexec UUID=$FSYS_DEV_UUID_AUDIT /var/log/audit >/dev/null 2>&1 || true
+    fi
+    info "ostreepost: finished"
+}
