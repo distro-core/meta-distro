@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: MIT
+
+name: Mark and Close Stale Issues, PRs
+
+run-name: '${{ github.event_name }} on ${{ github.ref_name && github.ref_name || github.ref }} : ${{ github.workflow }}'
+
+# This workflow automatically marks then closes both issues
+# and PRs that are unattended older than a specified expiry.
+
+# Secrets
+# secrets.GITHUB_TOKEN                      Built-in
+# secrets.ACTIONS_STEP_DEBUG                Repository
+
+on:
+  schedule:
+  - cron: '10 6 * * *'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+########################################################################
+
+env:
+  days_before_stale: 30
+  days_before_close: 10
+
+########################################################################
+
+jobs:
+  Run:
+    runs-on: ubuntu-latest
+    steps:
+
+    # GitHub actions stale
+    # https://github.com/actions/stale
+
+    - uses: actions/stale@v9
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        delete-branch: false
+        days-before-stale: ${{ env.days_before_stale }}
+        days-before-close: ${{ env.days_before_close }}
+        stale-issue-label: stale
+        stale-pr-label: stale
+        close-issue-label: closed
+        close-pr-label: closed
+        exempt-issue-labels: bug,wip,on-hold
+        exempt-pr-labels: bug,wip,on-hold
+        exempt-all-milestones: true
+        stale-issue-message: >-
+          This issue has been automatically transitioned to stale because it
+          has been open ${{ env.days_before_stale }} days with no activity.
+          Remove the stale label or comment on this issue else it will be
+          closed in ${{ env.days_before_close }} days.
+        stale-pr-message: >-
+          This PR has been automatically transitioned to stale because it
+          has been open ${{ env.days_before_stale }} days with no activity.
+          Remove the stale label or comment on this PR else it will be
+          closed in ${{ env.days_before_close }} days.
+        close-issue-message: >-
+          This issue was automatically closed because it remained stale for
+          ${{ env.days_before_close }} days.
+        close-pr-message: >-
+          This PR was automatically closed because remained stale for
+          ${{ env.days_before_close }} days.

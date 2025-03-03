@@ -1,0 +1,82 @@
+# conf/templates/distro-tiny/bblayers.conf.sample
+
+# DISTROOVERRIDES and MACHINEOVERRIDES are not supported in this config
+# as they have not yet been set in the bitbake environment. All paths
+# are set set early the literal ##OEROOT## is fixed by the script
+# oe-init-build-env.
+
+POKY_BBLAYERS_CONF_VERSION = "2"
+
+# Pathing order is important here; the optional layers are pathed as expected in relation
+# to the other required layers. The operator used in the context of BBLAYERS is expected
+# to be "+=" to have a deterministic search order in the pathing established by bitbake.
+
+BBLAYERS  = "##OEROOT##/../../layers/meta-distro"
+
+# sdk
+# BBLAYERS += "##OEROOT##/../../layers/meta-clang"
+# BBLAYERS += "##OEROOT##/../../layers/meta-mingw"
+# BBLAYERS += "##OEROOT##/../../layers/meta-rust"
+
+# meta-openembedded
+BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-oe"
+# BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-filesystems"
+BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-networking"
+# BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-perl"
+BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-python"
+# BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-gnome"
+# BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-multimedia"
+# BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-webserver"
+# BBLAYERS += "##OEROOT##/../../layers/meta-openembedded/meta-xfce"
+
+# meta-updater
+BBLAYERS += "##OEROOT##/../../layers/meta-updater"
+
+# meta-virtualization
+# BBLAYERS += "##OEROOT##/../../layers/meta-virtualization"
+
+# meta-secure-core
+# BBLAYERS += "##OEROOT##/../../layers/meta-secure-core/meta-secure-core-common"
+# BBLAYERS += "##OEROOT##/../../layers/meta-secure-core/meta-efi-secure-boot"
+# BBLAYERS += "##OEROOT##/../../layers/meta-secure-core/meta-encrypted-storage"
+# BBLAYERS += "##OEROOT##/../../layers/meta-secure-core/meta-integrity"
+# BBLAYERS += "##OEROOT##/../../layers/meta-secure-core/meta-signing-key"
+# BBLAYERS += "##OEROOT##/../../layers/meta-secure-core/meta-tpm"
+# BBLAYERS += "##OEROOT##/../../layers/meta-secure-core/meta-tpm2"
+
+# meta-security
+# BBLAYERS += "##OEROOT##/../../layers/meta-security/meta-security"
+# BBLAYERS += "##OEROOT##/../../layers/meta-security/meta-integrity"
+# BBLAYERS += "##OEROOT##/../../layers/meta-security"
+# BBLAYERS += "##OEROOT##/../../layers/meta-security/meta-tpm"
+
+# meta-selinux
+# BBLAYERS += "##OEROOT##/../../layers/meta-selinux"
+
+# meta-bsp
+# BBLAYERS += "##OEROOT##/../../layers/meta-arm"
+# BBLAYERS += "##OEROOT##/../../layers/meta-freescale"
+# BBLAYERS += "##OEROOT##/../../layers/meta-freescale-3rdparty"
+BBLAYERS += "##OEROOT##/../../layers/meta-intel"
+BBLAYERS += "##OEROOT##/../../layers/meta-raspberrypi"
+# BBLAYERS += "##OEROOT##/../../layers/meta-riscv"
+# BBLAYERS += "##OEROOT##/../../layers/meta-st-stm32mp"
+BBLAYERS += "##OEROOT##/../../layers/meta-tegra"
+# BBLAYERS += "##OEROOT##/../../layers/meta-ti"
+# BBLAYERS += "##OEROOT##/../../layers/meta-xilinx"
+# BBLAYERS += "##OEROOT##/../../layers/meta-xilinx-tools"
+
+# poky/openembedded (last)
+BBLAYERS += "##OEROOT##/../../layers/poky/meta"
+BBLAYERS += "##OEROOT##/../../layers/poky/meta-poky"
+
+# masked recipes (remove greedy match with paths)
+BBMASK += "packagegroup-distro[^/]*\.bbappend$"
+BBMASK += "distro[^/]*\.bbappend$"
+# mask selinux/meta-clang conflicts not handled by nonclangable.conf or conf/distro/include/distro-clang.inc
+BBMASK += "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'uutils-coreutils', '', d)}"
+
+# bitbake logging handlers
+BB_LOGCONFIG = "##OEROOT##/../../layers/meta-distro/conf/logging-conf.json"
+
+# ---

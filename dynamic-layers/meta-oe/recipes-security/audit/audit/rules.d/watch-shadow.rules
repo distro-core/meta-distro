@@ -1,0 +1,5 @@
+# watches for shadow (write, attribute)
+-w /etc/group -p wa
+-w /etc/passwd -p wa
+-w /etc/shadow -p wa
+-w /etc/sudoers -p wa

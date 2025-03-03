@@ -1,0 +1,169 @@
+############################################################
+# Sierra Wireless Modules
+############################################################
+# location: /etc/udev/rules.d/
+
+# Dispatch only for Sierra Wireless Modules ID_VENDOR=1199
+
+ACTION=="add",    ATTRS{idVendor}=="1199", GOTO="sierra-wireless-add"
+ACTION=="change", ATTRS{idVendor}=="1199", GOTO="sierra-wireless-add"
+ACTION=="remove", ATTRS{idVendor}=="1199", GOTO="sierra-wireless-remove"
+
+GOTO="sierra-wireless-end"
+
+############################################################
+#
+# Sierra Wireless modules have four endpoints when in the
+# expected configuration. This should be performed on first start.
+#
+# :1.0  - DM serial port (or Firmware Download)
+# :1.2  - GPS serial port
+# :1.3  - AT serial port
+# :1.8  - QMI port
+# :1.12 - MBIM port
+#
+# AT!USBCOMP=1,3,10D    # QMI
+# AT!USBCOMP=1,3,100D   # MBIM
+#
+# The assiciated rules setup symbolic links in /dev, and where
+# necessary, will set RAW-IP through execution of a script at
+# the time the networking ports are first enumerated. The devices
+# are setup with static names when they are enumerated; the names
+# allow for position dependent enumeration based on bus location.
+# Also reflected in the position indicates if the port is enumerated
+# USB2 or USB3.
+#
+# NAME of network interfaces cannot utilize the kernel name wwan*
+# as this will cause a race condition when modules are starting up and
+# the kernel selects the first open kernel name to assiciate with module
+# module -- a potential race condition where the number of modules
+# is greater than one. The resolution is to utilize udev to assign
+# specific module based on KERNELS (ID_PATH) to a specific prefix
+# (eg. cellular0, cellular1).
+#
+# NET devices have RAW_IP set when they are utilizing the qmi_wwan
+# driver. This is performed when the device is enumerated by
+# udev.
+#
+# GPS devices may need "$GPS_START\r\n" applied to them on enumeration
+# if they are to be used by gpsd. This is performed when the device is
+# enumerated by udev.
+#
+# All devices are associated to the group dialout, and permissions are
+# set for the group to have read/write to the devices.
+#
+# KERNELS is set to the USB port identifier, multiple port identifiers
+# are seperated with "|" to allow udev to select any one of the ports.
+# Supporting an additional positional location for a module requires the
+# addition of it's USB path to the KERNELS identifier. These rules are
+# setup for the capability of two modules.
+#
+# systemd and udev can work together to start and stop an instance of
+# agent when the device is enumerated or removed.
+#
+# Interfaces not managed by ModemManager have the environment
+# ID_MM_PORT_IGNORE set to "1". Other ID_MM_PORT_TYPE are set
+# as determined by USB endpoint.
+#
+# Interfaces not managed by NetworkManager have the environment
+# NM_UNMANAGED set to "1"
+#
+# Ports set for test configuration are specifically positioned
+# on a hub which has USB3 capability. Certain modules have extreme
+# difficulty with firmware updates on USB3 capable ports and
+# will error out.
+#
+# Export of diag port to network can be performed with a command
+#
+# socat -d -d -d -d tcp-listen:4141,reuseaddr,fork \
+#   file:$(realpath /dev/cellular0-diag),nonblock,cs8,b115200,cstopb=0,raw,echo=0
+#
+############################################################
+
+############################################################
+# Sierra Wireless Add/Change
+############################################################
+
+LABEL="sierra-wireless-add"
+
+ENV{ID_SERIAL_SHORT}="%s{serial}"
+ENV{ID_USB_BUS}="%s{busnum}-%s{devpath}"
+
+# Firmware Download Mode (Specific Modules by idProduct)
+ATTRS{idProduct}=="9070", GOTO="sierra-wireless-fwdwl"
+ATTRS{idProduct}=="9078", GOTO="sierra-wireless-fwdwl"
+ATTRS{idProduct}=="907a", GOTO="sierra-wireless-fwdwl"
+ATTRS{idProduct}=="9090", GOTO="sierra-wireless-fwdwl"
+
+SUBSYSTEM=="tty", DRIVERS=="qcserial", KERNELS=="*:1.0", \
+    ENV{ID_MM_PORT_TYPE_QCDM}="1", \
+    SYMLINK+="cellular/%E{ID_USB_BUS}/dm", \
+    MODE="0660", OWNER="root", GROUP="dialout", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k DM'"
+
+SUBSYSTEM=="tty", DRIVERS=="qcserial", KERNELS=="*:1.2", \
+    ENV{ID_MM_PORT_TYPE_GPS}="1", \
+    SYMLINK+="cellular/%E{ID_USB_BUS}/gps", \
+    MODE="0660", OWNER="root", GROUP="dialout", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k GPS'"
+
+
+
+SUBSYSTEM=="tty", DRIVERS=="qcserial", KERNELS=="*:1.3", \
+    ENV{ID_MM_PORT_TYPE_AT_PRIMARY}="1", \
+    SYMLINK+="cellular/%E{ID_USB_BUS}/serial", \
+    MODE="0660", OWNER="root", GROUP="dialout", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k AT'"
+
+SUBSYSTEM=="usbmisc", DRIVERS=="qmi_wwan", KERNELS=="*:1.8", \
+    ENV{ID_MM_PORT_TYPE_QMI}="1", \
+    SYMLINK+="cellular/%E{ID_USB_BUS}/cdc-wdm", SYMLINK+="cellular/%E{ID_USB_BUS}/qmi", \
+    MODE="0600", OWNER="root", GROUP="root", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k CDC-WDM QMI'"
+
+SUBSYSTEM=="usbmisc", DRIVERS=="cdc_mbim", KERNELS=="*:1.12", \
+    ENV{ID_MM_PORT_TYPE_MBIM}="1", \
+    SYMLINK+="cellular/%E{ID_USB_BUS}/cdc-wdm", SYMLINK+="cellular/%E{ID_USB_BUS}/mbim", \
+    MODE="0600", OWNER="root", GROUP="root", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k CDC-WDM MBIM'"
+
+SUBSYSTEM=="net", DRIVERS=="qmi_wwan", \
+    PROGRAM+="/bin/sh -c 'ip link set down dev %k ; ip address flush dev %k'", \
+    PROGRAM+="/bin/sh -c 'echo Y > %S%p/qmi/raw_ip'", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k QMI'"
+
+SUBSYSTEM=="net", DRIVERS=="cdc_mbim", \
+    PROGRAM+="/bin/sh -c 'ip link set down dev %k ; ip address flush dev %k'", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k MBIM'"
+
+GOTO="sierra-wireless-end"
+
+############################################################
+# Sierra Wireless Firmware Download
+############################################################
+
+LABEL="sierra-wireless-fwdwl"
+
+SUBSYSTEM=="tty", DRIVERS=="qcserial", KERNELS=="*:1.0", \
+    ENV{ID_MM_PORT_IGNORE}="1", \
+    SYMLINK+="cellular/%E{ID_USB_BUS}/fwdwl", SYMLINK+="cellular/%E{ID_SERIAL_SHORT}/fwdwl", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: ADD %E{ID_USB_BUS} %E{ID_SERIAL_SHORT} %k FWDWL'"
+
+GOTO="sierra-wireless-end"
+
+############################################################
+# Sierra Wireless Remove
+############################################################
+
+LABEL="sierra-wireless-remove"
+
+SUBSYSTEM=="net|tty|usbmisc", \
+    RUN+="/bin/sh -c 'logger SWI-UDEV: REM %k'"
+
+GOTO="sierra-wireless-end"
+
+############################################################
+# Sierra Wireless End
+############################################################
+
+LABEL="sierra-wireless-end"

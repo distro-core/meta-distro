@@ -1,0 +1,20 @@
+{
+    "experimental": true,
+    "features": { "buildkit": false, "containerd-snapshotter": true },
+    "exec-opts": [],
+    "exec-root": "/var/run/docker",
+    "data-root": "/var/lib/docker",
+    "log-driver": "journald",
+    "log-level": "info",
+    "insecure-registries": [],
+    "registry-mirrors": [],
+    "bip": "10.0.0.1/24",
+    "default-address-pools": [
+        { "base": "10.0.2.0/18", "size": 24 }
+    ],
+    "ip-forward": true,
+    "ip-masq": true,
+    "iptables": true,
+    "ip6tables": true,
+    "userns-remap": "dockremap"
+}

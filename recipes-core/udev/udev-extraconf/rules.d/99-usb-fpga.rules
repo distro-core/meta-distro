@@ -1,0 +1,3 @@
+# name interfaces based on the bus location
+
+SUBSYSTEM=="tty", SUBSYSTEMS=="usb-serial" , DRIVERS=="ftdi_sio", KERNELS=="0000:00:00.0", SYMLINK+="fpgahs"

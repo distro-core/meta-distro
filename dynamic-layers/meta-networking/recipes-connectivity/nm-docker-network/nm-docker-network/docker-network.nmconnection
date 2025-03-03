@@ -1,0 +1,12 @@
+[connection]
+type=docker-network
+uuid=b2e4c72e-d7f4-40e9-bf3b-f9a9c2a23e3d
+id=example-docker-network
+
+[docker-network]
+name=my-docker-network
+driver=bridge
+subnet=172.18.0.0/16
+gateway=172.18.0.1
+ip-range=172.18.1.0/24
+options={'com.docker.network.bridge.name':'docker0','com.docker.network.bridge.gateway_mode_ipv4':'nat'}

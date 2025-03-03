@@ -1,0 +1,19 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
+    // Extension identifier format: ${publisher}.${name}. Example: vscode.csharp
+    "recommendations": [
+        "github.copilot",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "mads-hartmann.bash-ide-vscode",
+        "ms-python.python",
+        "ms-python.autopep8",
+        "ms-python.vscode-pylance",
+        "ms-vscode-remote.vscode-remote-extensionpack",
+        "redhat.vscode-xml",
+        "redhat.vscode-yaml",
+        "yocto-project.yocto-bitbake",
+    ],
+    // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
+    "unwantedRecommendations": []
+}

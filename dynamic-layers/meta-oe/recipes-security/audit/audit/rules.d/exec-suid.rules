@@ -1,0 +1,3 @@
+# execution of program effective uid=root
+-a exit,always -F arch=b32 -F euid=0 -S execve -k rootcmd
+-a exit,always -F arch=b64 -F euid=0 -S execve -k rootcmd

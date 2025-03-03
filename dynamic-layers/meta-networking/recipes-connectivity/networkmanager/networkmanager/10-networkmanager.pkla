@@ -1,0 +1,6 @@
+[NetworkManager]
+Identity=unix-group:netdev
+Action=org.freedesktop.NetworkManager.*
+ResultAny=yes
+ResultActive=yes
+ResultInactive=yes

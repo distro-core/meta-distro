@@ -1,0 +1,10 @@
+# UNCONFIGURED FSTAB FOR BASE SYSTEM
+# drvfs mount to a drive letter
+# M: /mnt/m drvfs rw,noatime,uid=user,gid=user,case=dir,umask=077,fmask=077,dmask=077,x-mount.mkdir 0 0
+# O: /mnt/o drvfs rw,noatime,uid=user,gid=user,case=dir,umask=077,fmask=077,dmask=077,x-mount.mkdir 0 0
+# bind mount to windows_user home
+# /mnt/c/Users/windows_user /mnt/home none bind,default,x-mount.mkdir 0 0
+# cifs requires /etc/smbcredentials
+# //192.168.1.10/shared/artifacts /mnt/artifacts cifs vers=3,user,rw,credentials=/etc/smbcredentials,iocharset=utf8,uid=user,forceuid,gid=user,forcegid,noauto,x-mount.mkdir,x-systemd.automount 0 0
+# //192.168.1.10/shared/downloads /mnt/downloads cifs vers=3,user,rw,credentials=/etc/smbcredentials,iocharset=utf8,uid=user,forceuid,gid=user,forcegid,noauto,x-mount.mkdir,x-systemd.automount 0 0
+# //192.168.1.10/shared/sstate-cache /mnt/sstate-cache cifs vers=3,user,rw,credentials=/etc/smbcredentials,iocharset=utf8,uid=user,forceuid,gid=user,forcegid,noauto,x-mount.mkdir,x-systemd.automount 0 0

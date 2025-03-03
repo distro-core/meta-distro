@@ -1,0 +1,18 @@
+Defaults env_reset
+Defaults secure_path="/usr/sbin:/usr/bin:/sbin:/bin"
+Defaults use_pty
+
+Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
+Defaults:%sudo env_keep += "SSH_AGENT_PID SSH_AUTH_SOCK"
+
+cmd_Alias HOSTNAMECTL = /usr/bin/hostnamectl status
+cmd_Alias JOURNALCTL = /usr/bin/journalctl *
+cmd_Alias LOCALECTL = /usr/bin/localectl status
+cmd_Alias NETWORKCTL = /usr/bin/networkctl status
+cmd_Alias RESOLVECTL = /usr/bin/resolvectl status
+cmd_Alias TIMEDATECTL = /usr/bin/timedatectl status, /usr/bin/timedatectl set-ntp (off|on)
+cmd_Alias SYSTEMCTL = /usr/bin/systemctl status *, /usr/bin/systemctl start *, /usr/bin/systemctl stop *
+
+%clicmd ALL=(ALL:ALL) NOPASSWD: HOSTNAMECTL, JOURNALCTL, LOCALECTL, NETWORKCTL, RESOLVECTL, TIMEDATECTL
+
+%sudo ALL=(ALL:ALL) ALL

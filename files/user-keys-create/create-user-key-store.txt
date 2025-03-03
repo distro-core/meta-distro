@@ -1,0 +1,43 @@
+ -d <dir>
+    Set the path to save the generated user keys.
+    Default: `pwd`/user-keys
+ -c <gpg key comment>
+    Set the RPM/OStree gpg's key name
+    Default: $gpg_comment
+ -n <gpg key name>
+    Set the RPM/OStree gpg's key name
+    Default: $gpg_key_name
+ -m <gpg key owner's email address>
+    Set the RPM/OStree owner's email address of the gpg key
+    Default: $gpg_email
+ -rp <OSTree/RPM GPG passphrase>
+ -bgp <Boot Loader GPG passphrase>
+ -bp <Boot loader config password>
+ -ip <IMA passphrase>
+ --days          Specify the number of days to make a certificate valid for
+                 Default: $OPENSSL_DAYS
+ -h|--help       Show this help information.
+Overides:
+ -bc <gpg key comment>
+    Force set the gpg key comment for the boot loader
+ -bn <gpg key name>
+    Force set the gpg key name for the boot loader
+ -bm <gpg key owner's email address>
+    Force set the gpg email address for the boot loader
+
+Example:
+
+rm -fr $(pwd)/user-keys
+
+./create-user-key-store.sh -d $(pwd)/user-keys \
+   -c "Distro Core" \
+   -bc "Distro Core" \
+   -n "RPM Signing" \
+   -bn "BOOT Signing" \
+   -m "release@internal" \
+   -bm "release@internal" \
+   -rp passphrase \
+   -bgp passphrase \
+   -bp passphrase \
+   -ip passphrase \
+   --days 9125

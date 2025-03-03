@@ -1,0 +1,14 @@
+# short-description: Disk image from OTA_SYSROOT
+# long-description: Creates an unencrypted EFI disk image
+
+# bootloader using generated configfile
+bootloader --ptable gpt --configfile="${MACHINE}.conf" --timeout="60" --append="systemd.unit=${SYSTEMD_DEFAULT_TARGET}"
+
+# sda1
+part /boot/efi --source=rootfs --rootfs-dir=${OTA_SYSROOT}/boot/efi --active --no-fstab-update --ondisk=sda --fstype=${FSYS_DEV_TYPE_ESP} --align=1024 --fixed-size=64512 --label=${GPT_PART_NAME_ESP} --part-type=${GPT_PART_TYPE_ESP} --uuid=${GPT_PART_UUID_ESP} --fsuuid=${FSYS_DEV_UUID_ESP}
+
+# sda2
+part /boot --source=rootfs --rootfs-dir=${OTA_SYSROOT}/boot --exclude=/boot/efi/ --no-fstab-update --ondisk=sda --fstype=${FSYS_DEV_TYPE_XBOOTLDR} --align=1024 --fixed-size=511M --label=${GPT_PART_NAME_XBOOTLDR} --part-type=${GPT_PART_TYPE_XBOOTLDR} --uuid=${GPT_PART_UUID_XBOOTLDR} --fsuuid=${FSYS_DEV_UUID_XBOOTLDR}
+
+# sda3
+part / --source=rootfs --rootfs-dir=${OTA_SYSROOT} --exclude=boot/ --no-fstab-update --ondisk=sda --fstype=${FSYS_DEV_TYPE_ROOT} --align=1024 --fixed-size=7679M --label=${GPT_PART_NAME_ROOT} --part-type=${GPT_PART_TYPE_ROOT} --uuid=${GPT_PART_UUID_ROOT} --fsuuid=${FSYS_DEV_UUID_ROOT}

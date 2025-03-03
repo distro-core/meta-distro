@@ -1,0 +1,2 @@
+%docker ALL=(root:docker) NOPASSWD: /usr/bin/docker
+%docker ALL=(root:docker) NOPASSWD: /usr/bin/podman
