@@ -1,0 +1,77 @@
+{
+    "version": 1,
+    "formatters": {
+        "logfileFormatter": {
+            "()": "bb.msg.BBLogFormatter",
+            "format": "%(levelname)s: %(asctime)s %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        },
+        "githubActionsFormatterError": {
+            "()": "bb.msg.BBLogFormatter",
+            "format": "::error:: %(asctime)s %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        },
+        "githubActionsFormatterWarning": {
+            "()": "bb.msg.BBLogFormatter",
+            "format": "::warning:: %(asctime)s %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        }
+    },
+    "handlers": {
+        "errorActions": {
+            "class": "logging.StreamHandler",
+            "level": "ERROR",
+            "formatter": "githubActionsFormatterError",
+            "stream": "ext://sys.stdout"
+        },
+        "warningActions": {
+            "class": "logging.StreamHandler",
+            "level": "WARNING",
+            "formatter": "githubActionsFormatterWarning",
+            "stream": "ext://sys.stdout"
+        },
+        "noteActions": {
+            "class": "logging.StreamHandler",
+            "level": "NOTE",
+            "formatter": "logfileFormatter",
+            "stream": "ext://sys.stdout"
+        },
+        "errorLogfile": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "ERROR",
+            "filename": "bitbake-error.log"
+        },
+        "warningLogfile": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "WARNING",
+            "filename": "bitbake-warn.log"
+        },
+        "noteLogfile": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "NOTE",
+            "filename": "bitbake.log"
+        },
+        "hashservLogfile": {
+            "class": "logging.FileHandler",
+            "formatter": "logfileFormatter",
+            "level": "NOTE",
+            "filename": "hashequiv.log"
+        }
+    },
+    "loggers": {
+        "BitBake": {
+            "handlers": [ "errorActions", "errorLogfile", "warningLogfile", "noteLogfile" ]
+        },
+        "BitBake.SigGen.HashEquiv": {
+            "handlers": [ "hashservLogfile" ]
+        },
+        "BitBake.RunQueue.HashEquiv": {
+            "handlers": [ "hashservLogfile" ]
+        }
+    },
+    "bitbake_merge": true,
+    "@disable_existing_loggers": false
+}

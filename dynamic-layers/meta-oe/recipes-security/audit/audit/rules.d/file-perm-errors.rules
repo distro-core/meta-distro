@@ -1,0 +1,5 @@
+# specific file permission errors
+-a always,exit -F arch=b32 -S open -S openat -F exit=-EACCES -k access
+-a always,exit -F arch=b32 -S open -S openat -F exit=-EPERM -k access
+-a always,exit -F arch=b64 -S open -S openat -F exit=-EACCES -k access
+-a always,exit -F arch=b64 -S open -S openat -F exit=-EPERM -k access
