@@ -1,0 +1,60 @@
+#!/bin/sh
+
+CRYPTSETUP=/sbin/cryptsetup
+
+SHRED=/bin/shred
+
+LUKS_NAME=""
+
+LUKS_DEVICE=""
+
+luks_keyfile_shred() {
+    if [ "/dev/null" = "$LUKS_KEYFILE" ]; then
+        return
+    fi
+    if $SHRED -fzu $LUKS_KEYFILE; then
+        return
+    fi
+    fatal "luks: failed shred"
+}
+
+luks_enabled() {
+    if [ -x "$CRYPTSETUP" ]; then
+        if [ -z "$LUKS_KEYFILE" ]; then
+            LUKS_KEYFILE=$(mktemp -u /tmp/luks-key.XXXXXX)
+            dd if=/dev/zero of=$LUKS_KEYFILE bs=2048 count=1
+            debug "luks: LUKS_KEYFILE well-known-key"
+        fi
+        # rd.luks.uuid=<uuid>
+        if [ -n "$bootparam_rd_luks_uuid" ]; then
+            LUKS_DEVICE="/dev/disk/by-uuid/$bootparam_rd_luks_uuid"
+            LUKS_NAME="cryptLuks"
+            debug "luks: bootparam_rd_luks_uuid"
+        # rd.luks.name=<uuid>=<name>
+        elif [ -n "$bootparam_rd_luks_name" ]; then
+            LUKS_DEVICE="/dev/disk/by-uuid/$(echo $bootparam_rd_luks_name | cut -d'=' -f1)"
+            LUKS_NAME="$(echo $bootparam_rd_luks_name | cut -d'=' -f2)"
+            debug "luks: bootparam_rd_luks_name"
+        fi
+        if [ -n "$LUKS_DEVICE" && -b "$LUKS_DEVICE" ]; then
+            if [ ! -z "$LUKS_NAME" ]; then
+                if $CRYPTSETUP isLuks $LUKS_DEVICE; then
+                    info "luks: enabled"
+                    return 0
+                fi
+            fi
+        fi
+    fi
+    info "luks: disabled"
+	return 1
+}
+
+luks_run() {
+    info "luks: run"
+    if ! $CRYPTSETUP luksOpen --key-file $LUKS_KEYFILE $LUKS_DEVICE $LUKS_NAME; then
+        luks_keyfile_shred
+        fatal "luks: failed"
+    fi
+    luks_keyfile_shred
+    info "luks: finished"
+}
