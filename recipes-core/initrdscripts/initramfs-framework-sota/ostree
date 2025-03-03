@@ -1,0 +1,20 @@
+#!/bin/sh
+
+OSTREE_PREPARE_ROOT=/usr/lib/ostree/ostree-prepare-root
+
+ostree_enabled() {
+    if [ -x "$OSTREE_PREPARE_ROOT" ]; then
+        if [ -n "$bootparam_ostree" ]; then
+            info "ostree: enabled"
+            return 0
+        fi
+    fi
+    info "ostree: disabled"
+    return 1
+}
+
+ostree_run() {
+    info "ostree: run"
+    $OSTREE_PREPARE_ROOT $ROOTFS_DIR
+    info "ostree: finished"
+}

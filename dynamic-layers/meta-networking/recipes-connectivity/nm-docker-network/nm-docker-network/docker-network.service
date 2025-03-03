@@ -1,0 +1,3 @@
+[NetManager Plugin]
+Name=Docker Network Plugin
+Module=docker-network
