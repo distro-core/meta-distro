@@ -1,0 +1,119 @@
+###############################################################################
+# 1. COMMON HEADER                                                            #
+###############################################################################
+
+*filter
+
+# Base policy
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Don't attempt to firewall internal traffic on the loopback device.
+-A INPUT -i lo -j ACCEPT
+
+# Continue connections that are already established or related to an established
+# connection.
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# Drop non-conforming packets, such as malformed headers, etc.
+-A INPUT -m conntrack --ctstate INVALID -j DROP
+
+# Block remote packets claiming to be from a loopback address.
+-A INPUT -s 127.0.0.0/8 ! -i lo -j DROP
+
+# Drop all packets that are going to broadcast, multicast or anycast address.
+-A INPUT -m addrtype --dst-type BROADCAST -j DROP
+-A INPUT -m addrtype --dst-type ANYCAST -j DROP
+#-A INPUT -m addrtype --dst-type MULTICAST -j DROP
+#-A INPUT -d 224.0.0.0/4 -j DROP
+
+# Drop all ssh from WWAN0/WWAN1
+-A INPUT -i WWAN0 -p tcp --dport 22 -j DROP
+-A INPUT -i WWAN1 -p tcp --dport 22 -j DROP
+
+# Chain for preventing SSH brute-force attacks.
+# Permits 10 new connections within 5 minutes from a single host then drops
+# incomming connections from that host. Beyond a burst of 100 connections we
+# log at up 1 attempt per second to prevent filling of logs.
+-N SSHBRUTE
+-A SSHBRUTE -m recent --name SSH --set
+-A SSHBRUTE -m recent --name SSH --update --seconds 300 --hitcount 10 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[SSH-brute]: "
+-A SSHBRUTE -m recent --name SSH --update --seconds 300 --hitcount 10 -j DROP
+-A SSHBRUTE -j ACCEPT
+
+# Chain for preventing ping flooding - up to 6 pings per second from a single
+# source, again with log limiting. Also prevents us from ICMP REPLY flooding
+# some victim when replying to ICMP ECHO from a spoofed source.
+-N ICMPFLOOD
+-A ICMPFLOOD -m recent --set --name ICMP --rsource
+-A ICMPFLOOD -m recent --update --seconds 1 --hitcount 6 --name ICMP --rsource --rttl -m limit --limit 1/sec --limit-burst 1 -j LOG --log-prefix "iptables[ICMP-flood]: "
+-A ICMPFLOOD -m recent --update --seconds 1 --hitcount 6 --name ICMP --rsource --rttl -j DROP
+-A ICMPFLOOD -j ACCEPT
+
+###############################################################################
+# 2. HOST SPECIFIC RULES                                                      #
+###############################################################################
+
+# Accept HTTP and HTTPS
+#-A INPUT -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
+
+# Accept FTP only for IPv4
+#-4 -A INPUT -p tcp --dport 21 --syn -m conntrack --ctstate NEW -j ACCEPT
+
+###############################################################################
+# 3. GENERAL RULES                                                            #
+###############################################################################
+
+# Accept worldwide access to SSH and use SSHBRUTE chain for preventing
+# brute-force attacks.
+-A INPUT -p tcp --dport 22 --syn -m conntrack --ctstate NEW -j SSHBRUTE
+
+# Permit useful IMCP packet types for IPv4
+# Note: RFC 792 states that all hosts MUST respond to ICMP ECHO requests.
+# Blocking these can make diagnosing of even simple faults much more tricky.
+# Real security lies in locking down and hardening all services, not by hiding.
+-A INPUT -p icmp --icmp-type 0  -m conntrack --ctstate NEW -j ACCEPT
+-A INPUT -p icmp --icmp-type 3  -m conntrack --ctstate NEW -j ACCEPT
+-A INPUT -p icmp --icmp-type 11 -m conntrack --ctstate NEW -j ACCEPT
+
+# Permit IMCP echo requests (ping) and use ICMPFLOOD chain for preventing ping
+# flooding.
+-A INPUT -p icmp --icmp-type 8  -m conntrack --ctstate NEW -j ICMPFLOOD
+
+# Do not accept packets that are going to ports used by SMB
+# (Samba / Windows Sharing).
+-A INPUT -p udp -m multiport --dports 135,445 -j DROP
+-A INPUT -p udp --dport 137:139 -j DROP
+-A INPUT -p udp --sport 137 --dport 1024:65535 -j DROP
+-A INPUT -p tcp -m multiport --dports 135,139,445 -j DROP
+
+# Do not accept packets that are going to port used by UPnP protocol.
+-A INPUT -p udp --dport 1900 -j DROP
+
+# Do not accept late replies from nameservers.
+-A INPUT -p udp --sport 53 -j DROP
+
+# Good practise is to explicately reject AUTH traffic so that it fails fast.
+-A INPUT -p tcp --dport 113 --syn -m conntrack --ctstate NEW -j REJECT --reject-with tcp-reset
+
+# Prevent DOS by filling log files.
+-A INPUT -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+
+COMMIT
+
+###############################################################################
+# 4. HOST SPECIFIC NAT RULES                                                  #
+###############################################################################
+
+#*nat
+
+# Base policy
+#:PREROUTING ACCEPT [0:0]
+#:POSTROUTING ACCEPT [0:0]
+#:OUTPUT ACCEPT [0:0]
+
+# Redirect port 21 to local port 2121
+#-A PREROUTING -i ETH0 -p tcp --dport 21 -j REDIRECT --to-port 2121
+
+#COMMIT

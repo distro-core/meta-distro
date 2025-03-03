@@ -1,0 +1,7 @@
+# execution of program iptables and its softlinks
+-a always,exit -F arch=b32 -S execve -F exe=/usr/sbin/iptables -k iptables_exec
+-a always,exit -F arch=b32 -S execve -F exe=/usr/sbin/xtables-legacy-multi -k iptables_exec
+-a always,exit -F arch=b32 -S execve -F exe=/usr/sbin/xtables-nft-multi -k iptables_exec
+-a always,exit -F arch=b64 -S execve -F exe=/usr/sbin/iptables -k iptables_exec
+-a always,exit -F arch=b64 -S execve -F exe=/usr/sbin/xtables-legacy-multi -k iptables_exec
+-a always,exit -F arch=b64 -S execve -F exe=/usr/sbin/xtables-nft-multi -k iptables_exec

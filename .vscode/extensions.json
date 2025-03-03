@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "github.copilot",
+        "github.vscode-codeql",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "ms-vscode-remote.vscode-remote-extensionpack",
+        "redhat.vscode-xml",
+        "redhat.vscode-yaml",
+        "yocto-project.yocto-bitbake",
+    ]
+}
