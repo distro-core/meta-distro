@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "github.copilot",
+        "github.vscode-codeql",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "mads-hartmann.bash-ide-vscode",
+        "ms-vscode-remote.vscode-remote-extensionpack",
+        "redhat.vscode-xml",
+        "redhat.vscode-yaml",
+        "yocto-project.yocto-bitbake",
+        "1yib.rust-bundle",
+        "rust-lang.rust-analyzer",
+    ]
+}
